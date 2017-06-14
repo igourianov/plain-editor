@@ -1,6 +1,19 @@
 <html>
 	<head>
 		<link rel="stylesheet" href="plain-editor.css" />
+		<link rel="stylesheet" href="theme/default.css" />
+		<style>
+body {
+	margin: 200px auto;
+	width: 500px;
+}
+
+textarea {
+	display: block;
+	width: 400px;
+	height: 200px;
+}
+		</style>
 		<script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
 		<script src="plain-editor.js"></script>
 	</head>
@@ -8,7 +21,7 @@
 		<textarea></textarea>
 		<script>
 			$(function() {
-				$("textarea").plainEditor();
+				$("textarea").plainEditor().addClass("theme-default");
 			});
 		</script>
 	</body>

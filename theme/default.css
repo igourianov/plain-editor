@@ -1,0 +1,11 @@
+
+textarea.plain-editor.theme-default {
+	color: #333;
+	padding: 0.5em;
+	transition: font-size 100ms ease-out;
+}
+
+textarea.plain-editor.theme-default.full-screen {
+	padding: 1em;
+	font-size: 2em;
+}
