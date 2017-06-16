@@ -7,9 +7,9 @@
 		MOD_ALT = 2,
 		MOD_CTRL = 4,
 		MOD_META = 8,
-		KEY_ENTER = 13,
-		KEY_TAB = 9,
-		KEY_ESC = 27;
+		KEY_ENTER = "Enter",
+		KEY_TAB = "Tab",
+		KEY_ESC = "Escape";
 
 	var findAny = function (source, chars, index, increment) {
 		while (index >= 0 && index < source.length) {
@@ -48,7 +48,7 @@
 					selectionStart = editor.selectionStart,
 					selectionEnd = editor.selectionEnd,
 					selection = editor.value.substring(selectionStart, selectionEnd),
-					key = e.keyCode,
+					key = e.key,
 					mods = (+e.shiftKey * MOD_SHIFT) | (+e.altKey * MOD_ALT) | (+e.ctrlKey * MOD_CTRL) | (+e.metaKey * MOD_META);
 
 				//toggle full screen mode
