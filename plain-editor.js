@@ -61,8 +61,8 @@
 					var match = context.value.match(/^\s+/m);
 					if (match) {
 						insertText(editor, LF + match[0]);
+						return false;
 					}
-					return false;
 				}
 
 				if (key === KEY_ESC && !mods) {
