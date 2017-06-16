@@ -12,7 +12,7 @@
 		NBSP = "\u00A0";
 
 	var bullets = ["\u2022", "\u25E6", "\u25A0", "\u25B8"];
-	var indentRegex = new RegExp("^(\\s*)(" + bullets.map(function (x) { return "\\u" + x.charCodeAt(0).toString(16); }).join("|") + ")?\\s*", "mg");
+	var indentRegex = new RegExp("^(\\s*)(" + bullets.map(function (x) { return "\\u" + x.charCodeAt(0).toString(16); }).join("|") + "|(\\d{1,2})(\\)|\\.))?\\s*", "mg");
 
 	var findAny = function (source, chars, index, increment) {
 		while (index >= 0 && index < source.length) {
@@ -55,7 +55,7 @@
 			if (selectionStart > index) {
 				selectionStart += diff;
 			}
-			if (selectionEnd <= index + match.length) {
+			if (selectionEnd > index) {
 				selectionEnd += diff;
 			}
 			return ret;
@@ -115,9 +115,27 @@
 			key: "*",
 			mod: MOD_CTRL | MOD_SHIFT,
 			action: function (editor) {
-				transformContext(editor, indentRegex, function (match, indent, bullet, index) {
+				transformContext(editor, indentRegex, function (match, indent, bullet, digit, separator, index) {
 					bullet = bullets[bullets.indexOf(bullet) + 1];
 					return indent + (bullet ? bullet + NBSP : "");
+				});
+				return false;
+			}
+		},
+		{
+			// toggle ordered list
+			key: "&",
+			mod: MOD_CTRL | MOD_SHIFT,
+			action: function (editor) {
+				var counter = 0, toggle;
+				transformContext(editor, indentRegex, function (match, indent, bullet, digit, separator, index) {
+					if (toggle === undefined) {
+						toggle = !digit;
+					}
+					if (toggle) {
+						return indent + (++counter) + "." + NBSP;
+					}
+					return indent;
 				});
 				return false;
 			}
@@ -127,9 +145,10 @@
 			key: KEY_ENTER,
 			action: function (editor) {
 				var context = getSelectionContext(editor);
-				var match = context.value.match(indentRegex);
+				indentRegex.lastIndex = 0;
+				var match = indentRegex.exec(context.value);
 				if (match) {
-					insertText(editor, LF + match[0]);
+					insertText(editor, LF + match[1] + (match[3] !== undefined ? ++match[3] + match[4] : match[2]) + NBSP);
 					return false;
 				}
 			}
@@ -142,8 +161,8 @@
 				var editor = e.target,
 					key = e.key,
 					mod = (+e.shiftKey * MOD_SHIFT) | (+e.altKey * MOD_ALT) | (+e.ctrlKey * MOD_CTRL) | (+e.metaKey * MOD_META);
-				
-				for (var i=0; i<behaviors.length;i++) {
+
+				for (var i = 0; i < behaviors.length; i++) {
 					var behavior = behaviors[i];
 					if (behavior.key === key && (behavior.mod || 0) === mod) {
 						return behavior.action(editor);
