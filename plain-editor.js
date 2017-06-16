@@ -21,8 +21,8 @@
 			end = editor.selectionEnd,
 			value = editor.value;
 		return {
-			start: start = findAny(value, [CR, LF], start, 1) + 1,
-			end: end = findAny(value, [CR, LF], end, -1),
+			start: start = findAny(value, [CR, LF], start, -1) + 1,
+			end: end = findAny(value, [CR, LF], end, 1),
 			value: value.substring(start, end)
 		};
 	};
@@ -46,14 +46,14 @@
 				}
 
 				if (e.keyCode === 9 && !e.shiftKey) {
-					
+
 					if (!selection.match(NEWLINE_REGEX)) {
 						insertText(editor, TAB);
 					} else {
 						var context = getSelectionContext(editor);
 						var start = editor.selectionStart,
 							end = editor.selectionEnd;
-						var newValue = context.value.replace(/^/mg, function(match, index) {
+						var newValue = context.value.replace(/^/mg, function (match, index) {
 							if (index + context.start < start) {
 								start++;
 							}
@@ -68,21 +68,24 @@
 					}
 					return false;
 				}
-				/*if (e.keyCode === 9 && e.shiftKey) {
-					var sel = getSelectionLines(editor);
-					for (var i = 0; i < sel.lines.length; i++) {
-						if (sel.lines[i].startsWith(TAB)) {
-							sel.lines[i] = sel.lines[i].substr(1);
-						} else if (sel.lines[i].startsWith(" ")) {
-							sel.lines[i] = sel.lines[i].replace(/^ {1,4}/, "");
+				if (e.keyCode === 9 && e.shiftKey) {
+					var context = getSelectionContext(editor);
+					var start = editor.selectionStart,
+						end = editor.selectionEnd;
+					var newValue = context.value.replace(/^(?:\t| {1,4})/mg, function (match, index) {
+						if (index + context.start < start) {
+							start -= match.length;
 						}
-					}
-					editor.selectionStart = sel.start;
-					editor.selectionEnd = sel.end;
-					insertText(editor, sel.lines.join(LF));
-					//editor.selectionStart = sel.start; // reset selection after insert
+						end -= match.length;
+						return "";
+					});
+					editor.selectionStart = context.start;
+					editor.selectionEnd = context.end;
+					insertText(editor, newValue);
+					editor.selectionStart = start;
+					editor.selectionEnd = end;
 					return false;
-				}*/
+				}
 			});
 	};
 
