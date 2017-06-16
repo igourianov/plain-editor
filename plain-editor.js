@@ -2,7 +2,6 @@
 	var LF = "\n",
 		CR = "\r",
 		TAB = "\t",
-		NEWLINE_REGEX = /(?:\r\n|\r|\n)/,
 		MOD_SHIFT = 1,
 		MOD_ALT = 2,
 		MOD_CTRL = 4,
@@ -45,13 +44,34 @@
 		document.execCommand("insertText", false, text);
 	};
 
+	var transformContext = function (editor, regex, replacer) {
+		var selectionStart = editor.selectionStart,
+			selectionEnd = editor.selectionEnd;
+		var context = getSelectionContext(editor);
+		var value = context.value.replace(regex, function (match) {
+			var index = arguments[arguments.length - 2] + context.start;
+			var ret = replacer.apply(this, arguments);
+			var diff = ret.length - match.length;
+			if (selectionStart > index) {
+				selectionStart += diff;
+			}
+			if (selectionEnd <= index + match.length) {
+				selectionEnd += diff;
+			}
+			return ret;
+		});
+		editor.selectionStart = context.start;
+		editor.selectionEnd = context.end;
+		insertText(editor, value);
+		editor.selectionStart = selectionStart;
+		editor.selectionEnd = selectionEnd;
+	};
+
 	$.fn.plainEditor = function () {
 		return this.addClass("plain-editor")
 			.on("keydown", function (e) {
 				var editor = e.target,
-					selectionStart = editor.selectionStart,
-					selectionEnd = editor.selectionEnd,
-					selection = editor.value.substring(selectionStart, selectionEnd),
+					selection = editor.value.substring(editor.selectionStart, editor.selectionEnd),
 					key = e.key,
 					mods = (+e.shiftKey * MOD_SHIFT) | (+e.altKey * MOD_ALT) | (+e.ctrlKey * MOD_CTRL) | (+e.metaKey * MOD_META);
 
@@ -82,59 +102,26 @@
 
 				// indent text
 				if (key === KEY_TAB && !mods) {
-					if (!selection.match(NEWLINE_REGEX)) {
+					if (!selection.match(/(?:\r\n|\r|\n)/)) {
 						insertText(editor, TAB);
 					} else {
-						var context = getSelectionContext(editor);
-						editor.selectionStart = context.start;
-						editor.selectionEnd = context.end;
-						insertText(editor, context.value.replace(/^/mg, function (match, index) {
-							if (selectionStart > index + context.start) {
-								selectionStart++;
-							}
-							selectionEnd++;
-							return TAB;
-						}));
-						editor.selectionStart = selectionStart;
-						editor.selectionEnd = selectionEnd;
+						transformContext(editor, /^/mg, function (match, index) { return TAB; });
 					}
 					return false;
 				}
 
 				// decrease indentation
 				if (key === KEY_TAB && mods === MOD_SHIFT) {
-					var context = getSelectionContext(editor);
-					editor.selectionStart = context.start;
-					editor.selectionEnd = context.end;
-					insertText(editor, context.value.replace(/^(?:\t| {1,4})/mg, function (match, index) {
-						if (selectionStart > index + context.start) {
-							selectionStart -= match.length;
-						}
-						selectionEnd -= match.length;
-						return "";
-					}));
-					editor.selectionStart = selectionStart;
-					editor.selectionEnd = selectionEnd;
+					transformContext(editor, /^(?:\t| {1,4})/mg, function () { return ""; });
 					return false;
 				}
 
 				// toggle bullet points
 				if (key === "*" && mods === (MOD_CTRL | MOD_SHIFT)) {
-					var context = getSelectionContext(editor);
-					editor.selectionStart = context.start;
-					editor.selectionEnd = context.end;
-					insertText(editor, context.value.replace(bulletRegex, function (match, indent, bullet, index) {
+					transformContext(editor, bulletRegex, function (match, indent, bullet, index) {
 						bullet = bullets[bullets.indexOf(bullet) + 1];
-						var ret = indent + (bullet ? bullet + NBSP : "");
-						var diff = ret.length - match.length;
-						if (selectionStart > index + context.start) {
-							selectionStart += diff;
-						}
-						selectionEnd += diff;
-						return ret;
-					}));
-					editor.selectionStart = selectionStart;
-					editor.selectionEnd = selectionEnd;
+						return indent + (bullet ? bullet + NBSP : "");
+					});
 					return false;
 				}
 
