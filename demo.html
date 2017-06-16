@@ -1,5 +1,6 @@
 <html>
 	<head>
+		<meta charset="utf-8" /> 
 		<link rel="stylesheet" href="plain-editor.css" />
 		<link rel="stylesheet" href="theme/default.css" />
 		<style>
@@ -19,17 +20,17 @@ textarea {
 	</head>
 	<body>
 		<form>
-		<textarea spellcheck="false">Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-Integer facilisis euismod diam in rutrum.
-Donec vestibulum lobortis dolor, varius viverra neque dignissim eu.
-Pellentesque eget dui quis elit maximus elementum.
-Pellentesque scelerisque lobortis tellus, non eleifend nulla vestibulum et.
-Quisque pulvinar volutpat arcu, eu elementum felis consequat ut.
-Quisque cursus dui a velit tincidunt pulvinar. Vivamus quis congue ex.
-Proin sodales est justo, id porttitor tellus posuere bibendum. Praesent feugiat est nec est tincidunt, ac dapibus quam facilisis. Nulla facilisi.
-Sed id lorem ac massa facilisis rutrum.
-Phasellus tempor ante et orci venenatis, a dignissim nunc tincidunt.
-Proin in ligula scelerisque, fermentum lorem eget, fermentum dolor. Donec eu magna ac leo placerat commodo.</textarea>
+			<textarea spellcheck="false">This is a plain old TEXTAREA control that now supports basic formatting tools.
+Action keys:
+	• Alt+Enter	Toggle full screen mode
+	• Ctrl+Enter	Submit parent form (if present)
+	• Tab		Indent selected lines
+	• Shift+Tab	Reduce indentation on selected lines
+	• Escape	Close full screen mode if it is open. Otherwise exit focus from the control - this is needed to continue Tab-bing on the page.
+	• Ctrl+Shift+8	Toggle between 4 different bullet point modes, and no bullets
+	• Ctrl+Shift+7	Toggle numbered list mode
+	
+The editor will also automatically maintain indentation and lists when entering new line.</textarea>
 		</form>
 		<script>
 			$(function() {
