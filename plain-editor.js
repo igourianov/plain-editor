@@ -5,7 +5,8 @@
 		NEWLINE_REGEX = /(?:\r\n|\r|\n)/,
 		KEY_SHIFT = 1,
 		KEY_ALT = 2,
-		KEY_CTRL = 4;
+		KEY_CTRL = 4,
+		KEY_META = 8;
 
 	var findAny = function (source, chars, index, increment) {
 		while (index >= 0 && index < source.length) {
@@ -24,7 +25,7 @@
 			end = editor.selectionEnd,
 			value = editor.value;
 		return {
-			start: start = findAny(value, [CR, LF], start, -1) + 1,
+			start: start = findAny(value, [CR, LF], start - 1, -1) + 1,
 			end: end = findAny(value, [CR, LF], end, 1),
 			value: value.substring(start, end)
 		};
@@ -44,15 +45,15 @@
 					selectionStart = editor.selectionStart,
 					selectionEnd = editor.selectionEnd,
 					selection = editor.value.substring(selectionStart, selectionEnd),
-					keyCode = e.keyCode,
-					keyMods = (+e.shiftKey * KEY_SHIFT) | (+e.altKey * KEY_ALT) | (+e.ctrlKey * KEY_CTRL);
+					key = e.keyCode,
+					mods = (+e.shiftKey * KEY_SHIFT) | (+e.altKey * KEY_ALT) | (+e.ctrlKey * KEY_CTRL) | (+e.metaKey * KEY_META);
 
-				if (e.keyCode === 13 && keyMods === KEY_ALT) {
+				if (key === 13 && mods === KEY_ALT) {
 					$(editor).toggleClass("full-screen");
 					return false;
 				}
 
-				if (keyCode === 9 && keyMods === 0) {
+				if (key === 9 && !mods) {
 					if (!selection.match(NEWLINE_REGEX)) {
 						insertText(editor, TAB);
 					} else {
@@ -72,7 +73,7 @@
 					return false;
 				}
 
-				if (keyCode === 9 && keyMods === KEY_SHIFT) {
+				if (key === 9 && mods === KEY_SHIFT) {
 					var context = getSelectionContext(editor);
 					editor.selectionStart = context.start;
 					editor.selectionEnd = context.end;
@@ -88,9 +89,13 @@
 					return false;
 				}
 
-				if (keyCode === 13 && keyMods === 0) {
+				if (key === 13 && !mods) {
 					var context = getSelectionContext(editor);
-					//console.log(context);
+					var match = context.value.match(/^\s+/m);
+					if (match) {
+						insertText(editor, LF + match[0]);
+					}
+					return false;
 				}
 
 			});
