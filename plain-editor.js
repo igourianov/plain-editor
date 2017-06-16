@@ -1,4 +1,4 @@
-(function ($) {
+(function ($, document) {
 	var LF = "\n",
 		CR = "\r",
 		TAB = "\t",
@@ -12,7 +12,7 @@
 		NBSP = "\u00A0";
 
 	var bullets = ["\u2022", "\u25E6", "\u25A0", "\u25B8"];
-	var bulletRegex = /^(\s*)(\u2022|\u25E6|\u25A0|\u25B8)?\s*/mg;
+	var indentRegex = new RegExp("^(\\s*)(" + bullets.map(function (x) { return "\\u" + x.charCodeAt(0).toString(16); }).join("|") + ")?\\s*", "mg");
 
 	var findAny = function (source, chars, index, increment) {
 		while (index >= 0 && index < source.length) {
@@ -84,7 +84,7 @@
 				// maintain indentation on new lines
 				if (key === KEY_ENTER && !mods) {
 					var context = getSelectionContext(editor);
-					var match = context.value.match(/^\s+/m);
+					var match = context.value.match(indentRegex);
 					if (match) {
 						insertText(editor, LF + match[0]);
 						return false;
@@ -105,7 +105,7 @@
 					if (!selection.match(/(?:\r\n|\r|\n)/)) {
 						insertText(editor, TAB);
 					} else {
-						transformContext(editor, /^/mg, function (match, index) { return TAB; });
+						transformContext(editor, /^/mg, function () { return TAB; });
 					}
 					return false;
 				}
@@ -118,7 +118,7 @@
 
 				// toggle bullet points
 				if (key === "*" && mods === (MOD_CTRL | MOD_SHIFT)) {
-					transformContext(editor, bulletRegex, function (match, indent, bullet, index) {
+					transformContext(editor, indentRegex, function (match, indent, bullet, index) {
 						bullet = bullets[bullets.indexOf(bullet) + 1];
 						return indent + (bullet ? bullet + NBSP : "");
 					});
@@ -128,4 +128,4 @@
 			});
 	};
 
-}(jQuery));
+}(jQuery, document));
