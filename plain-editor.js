@@ -38,7 +38,9 @@
 		return this.addClass("plain-editor")
 			.on("keydown", function (e) {
 				var editor = e.target,
-					selection = editor.value.substring(editor.selectionStart, editor.selectionEnd);
+					selectionStart = editor.selectionStart,
+					selectionEnd = editor.selectionEnd,
+					selection = editor.value.substring(selectionStart, selectionEnd);
 
 				if (e.keyCode === 13 && e.altKey) {
 					$(editor).toggleClass("full-screen");
@@ -51,41 +53,42 @@
 						insertText(editor, TAB);
 					} else {
 						var context = getSelectionContext(editor);
-						var start = editor.selectionStart,
-							end = editor.selectionEnd;
-						var newValue = context.value.replace(/^/mg, function (match, index) {
-							if (index + context.start < start) {
-								start++;
-							}
-							end++;
-							return TAB;
-						});
 						editor.selectionStart = context.start;
 						editor.selectionEnd = context.end;
-						insertText(editor, newValue);
-						editor.selectionStart = start;
-						editor.selectionEnd = end;
+						insertText(editor, context.value.replace(/^/mg, function (match, index) {
+							if (selectionStart > index + context.start) {
+								selectionStart++;
+							}
+							selectionEnd++;
+							return TAB;
+						}));
+						editor.selectionStart = selectionStart;
+						editor.selectionEnd = selectionEnd;
 					}
 					return false;
 				}
+
 				if (e.keyCode === 9 && e.shiftKey) {
 					var context = getSelectionContext(editor);
-					var start = editor.selectionStart,
-						end = editor.selectionEnd;
-					var newValue = context.value.replace(/^(?:\t| {1,4})/mg, function (match, index) {
-						if (index + context.start < start) {
-							start -= match.length;
-						}
-						end -= match.length;
-						return "";
-					});
 					editor.selectionStart = context.start;
 					editor.selectionEnd = context.end;
-					insertText(editor, newValue);
-					editor.selectionStart = start;
-					editor.selectionEnd = end;
+					insertText(editor, context.value.replace(/^(?:\t| {1,4})/mg, function (match, index) {
+						if (selectionStart > index + context.start) {
+							selectionStart -= match.length;
+						}
+						selectionEnd -= match.length;
+						return "";
+					}));
+					editor.selectionStart = selectionStart;
+					editor.selectionEnd = selectionEnd;
 					return false;
 				}
+
+				if (e.keyCode === 13) {
+					var context = getSelectionContext(editor);
+					//console.log(context);
+				}
+
 			});
 	};
 
