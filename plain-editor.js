@@ -51,11 +51,13 @@
 					key = e.keyCode,
 					mods = (+e.shiftKey * MOD_SHIFT) | (+e.altKey * MOD_ALT) | (+e.ctrlKey * MOD_CTRL) | (+e.metaKey * MOD_META);
 
+				//toggle full screen mode
 				if (key === KEY_ENTER && mods === MOD_ALT) {
 					$(editor).toggleClass("full-screen");
 					return false;
 				}
 
+				// maintain indentation on new lines
 				if (key === KEY_ENTER && !mods) {
 					var context = getSelectionContext(editor);
 					var match = context.value.match(/^\s+/m);
@@ -65,6 +67,7 @@
 					}
 				}
 
+				// close full screen or exit focus (to compensate for Tab overridden action)
 				if (key === KEY_ESC && !mods) {
 					if ($(editor).is(".full-screen")) {
 						$(editor).removeClass("full-screen");
@@ -73,6 +76,7 @@
 					}
 				}
 
+				// indent text
 				if (key === KEY_TAB && !mods) {
 					if (!selection.match(NEWLINE_REGEX)) {
 						insertText(editor, TAB);
@@ -93,6 +97,7 @@
 					return false;
 				}
 
+				// decrease indentation
 				if (key === KEY_TAB && mods === MOD_SHIFT) {
 					var context = getSelectionContext(editor);
 					editor.selectionStart = context.start;
