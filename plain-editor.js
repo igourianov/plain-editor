@@ -67,64 +67,88 @@
 		editor.selectionEnd = selectionEnd;
 	};
 
+	var behaviors = [
+		{
+			// toggle full screen mode
+			key: KEY_ENTER,
+			mod: MOD_ALT,
+			action: function (editor) {
+				$(editor).toggleClass("full-screen");
+				return false;
+			}
+		},
+		{
+			// close full screen or exit focus (to compensate for Tab overridden action)
+			key: KEY_ESC,
+			action: function (editor) {
+				if ($(editor).is(".full-screen")) {
+					$(editor).removeClass("full-screen");
+				} else {
+					editor.blur();
+				}
+			}
+		},
+		{
+			// indent text
+			key: KEY_TAB,
+			action: function (editor) {
+				var selection = editor.value.substring(editor.selectionStart, editor.selectionEnd);
+				if (!selection.match(/(?:\r\n|\r|\n)/)) {
+					insertText(editor, TAB);
+				} else {
+					transformContext(editor, /^/mg, function () { return TAB; });
+				}
+				return false;
+			}
+		},
+		{
+			// decrease indentation
+			key: KEY_TAB,
+			mod: MOD_SHIFT,
+			action: function (editor) {
+				transformContext(editor, /^(?:\t| {1,4})/mg, function () { return ""; });
+				return false;
+			}
+		},
+		{
+			// toggle bullet points
+			key: "*",
+			mod: MOD_CTRL | MOD_SHIFT,
+			action: function (editor) {
+				transformContext(editor, indentRegex, function (match, indent, bullet, index) {
+					bullet = bullets[bullets.indexOf(bullet) + 1];
+					return indent + (bullet ? bullet + NBSP : "");
+				});
+				return false;
+			}
+		},
+		{
+			// maintain indentation on new lines
+			key: KEY_ENTER,
+			action: function (editor) {
+				var context = getSelectionContext(editor);
+				var match = context.value.match(indentRegex);
+				if (match) {
+					insertText(editor, LF + match[0]);
+					return false;
+				}
+			}
+		}
+	];
+
 	$.fn.plainEditor = function () {
 		return this.addClass("plain-editor")
 			.on("keydown", function (e) {
 				var editor = e.target,
-					selection = editor.value.substring(editor.selectionStart, editor.selectionEnd),
 					key = e.key,
-					mods = (+e.shiftKey * MOD_SHIFT) | (+e.altKey * MOD_ALT) | (+e.ctrlKey * MOD_CTRL) | (+e.metaKey * MOD_META);
-
-				//toggle full screen mode
-				if (key === KEY_ENTER && mods === MOD_ALT) {
-					$(editor).toggleClass("full-screen");
-					return false;
-				}
-
-				// maintain indentation on new lines
-				if (key === KEY_ENTER && !mods) {
-					var context = getSelectionContext(editor);
-					var match = context.value.match(indentRegex);
-					if (match) {
-						insertText(editor, LF + match[0]);
-						return false;
+					mod = (+e.shiftKey * MOD_SHIFT) | (+e.altKey * MOD_ALT) | (+e.ctrlKey * MOD_CTRL) | (+e.metaKey * MOD_META);
+				
+				for (var i=0; i<behaviors.length;i++) {
+					var behavior = behaviors[i];
+					if (behavior.key === key && (behavior.mod || 0) === mod) {
+						return behavior.action(editor);
 					}
 				}
-
-				// close full screen or exit focus (to compensate for Tab overridden action)
-				if (key === KEY_ESC && !mods) {
-					if ($(editor).is(".full-screen")) {
-						$(editor).removeClass("full-screen");
-					} else {
-						editor.blur();
-					}
-				}
-
-				// indent text
-				if (key === KEY_TAB && !mods) {
-					if (!selection.match(/(?:\r\n|\r|\n)/)) {
-						insertText(editor, TAB);
-					} else {
-						transformContext(editor, /^/mg, function () { return TAB; });
-					}
-					return false;
-				}
-
-				// decrease indentation
-				if (key === KEY_TAB && mods === MOD_SHIFT) {
-					transformContext(editor, /^(?:\t| {1,4})/mg, function () { return ""; });
-					return false;
-				}
-
-				// toggle bullet points
-				if (key === "*" && mods === (MOD_CTRL | MOD_SHIFT)) {
-					transformContext(editor, indentRegex, function (match, indent, bullet, index) {
-						bullet = bullets[bullets.indexOf(bullet) + 1];
-						return indent + (bullet ? bullet + NBSP : "");
-					});
-					return false;
-				}
-
 			});
 	};
 
