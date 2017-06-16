@@ -18,6 +18,7 @@ textarea {
 		<script src="plain-editor.js"></script>
 	</head>
 	<body>
+		<form>
 		<textarea spellcheck="false">Lorem ipsum dolor sit amet, consectetur adipiscing elit.
 Integer facilisis euismod diam in rutrum.
 Donec vestibulum lobortis dolor, varius viverra neque dignissim eu.
@@ -29,11 +30,16 @@ Proin sodales est justo, id porttitor tellus posuere bibendum. Praesent feugiat 
 Sed id lorem ac massa facilisis rutrum.
 Phasellus tempor ante et orci venenatis, a dignissim nunc tincidunt.
 Proin in ligula scelerisque, fermentum lorem eget, fermentum dolor. Donec eu magna ac leo placerat commodo.</textarea>
+		</form>
 		<script>
 			$(function() {
 				$("textarea").plainEditor()
 					.addClass("theme-default full-screen")
 					.focus();
+				$("form").on("submit", function() {
+					alert("Form submit!");
+					return false;
+				});
 			});
 		</script>
 	</body>

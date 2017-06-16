@@ -160,6 +160,13 @@
 					return false;
 				}
 			}
+		},
+		{
+			key: KEY_ENTER,
+			mod: MOD_CTRL,
+			action: function(editor) {
+				$(editor).closest("form").submit();
+			}
 		}
 	];
 
