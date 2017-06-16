@@ -3,10 +3,13 @@
 		CR = "\r",
 		TAB = "\t",
 		NEWLINE_REGEX = /(?:\r\n|\r|\n)/,
-		KEY_SHIFT = 1,
-		KEY_ALT = 2,
-		KEY_CTRL = 4,
-		KEY_META = 8;
+		MOD_SHIFT = 1,
+		MOD_ALT = 2,
+		MOD_CTRL = 4,
+		MOD_META = 8,
+		KEY_ENTER = 13,
+		KEY_TAB = 9,
+		KEY_ESC = 27;
 
 	var findAny = function (source, chars, index, increment) {
 		while (index >= 0 && index < source.length) {
@@ -46,14 +49,31 @@
 					selectionEnd = editor.selectionEnd,
 					selection = editor.value.substring(selectionStart, selectionEnd),
 					key = e.keyCode,
-					mods = (+e.shiftKey * KEY_SHIFT) | (+e.altKey * KEY_ALT) | (+e.ctrlKey * KEY_CTRL) | (+e.metaKey * KEY_META);
+					mods = (+e.shiftKey * MOD_SHIFT) | (+e.altKey * MOD_ALT) | (+e.ctrlKey * MOD_CTRL) | (+e.metaKey * MOD_META);
 
-				if (key === 13 && mods === KEY_ALT) {
+				if (key === KEY_ENTER && mods === MOD_ALT) {
 					$(editor).toggleClass("full-screen");
 					return false;
 				}
 
-				if (key === 9 && !mods) {
+				if (key === KEY_ENTER && !mods) {
+					var context = getSelectionContext(editor);
+					var match = context.value.match(/^\s+/m);
+					if (match) {
+						insertText(editor, LF + match[0]);
+					}
+					return false;
+				}
+
+				if (key === KEY_ESC && !mods) {
+					if ($(editor).is(".full-screen")) {
+						$(editor).removeClass("full-screen");
+					} else {
+						editor.blur();
+					}
+				}
+
+				if (key === KEY_TAB && !mods) {
 					if (!selection.match(NEWLINE_REGEX)) {
 						insertText(editor, TAB);
 					} else {
@@ -73,7 +93,7 @@
 					return false;
 				}
 
-				if (key === 9 && mods === KEY_SHIFT) {
+				if (key === KEY_TAB && mods === MOD_SHIFT) {
 					var context = getSelectionContext(editor);
 					editor.selectionStart = context.start;
 					editor.selectionEnd = context.end;
@@ -86,15 +106,6 @@
 					}));
 					editor.selectionStart = selectionStart;
 					editor.selectionEnd = selectionEnd;
-					return false;
-				}
-
-				if (key === 13 && !mods) {
-					var context = getSelectionContext(editor);
-					var match = context.value.match(/^\s+/m);
-					if (match) {
-						insertText(editor, LF + match[0]);
-					}
 					return false;
 				}
 
