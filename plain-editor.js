@@ -12,7 +12,7 @@
 		NBSP = "\u00A0";
 
 	var bullets = ["\u2022", "\u25E6", "\u25A0", "\u25B8"];
-	var indentRegex = new RegExp("^(\\s*)(" + bullets.map(function (x) { return "\\u" + x.charCodeAt(0).toString(16); }).join("|") + "|(\\d{1,2})(\\)|\\.))?\\s*", "mg");
+	var indentRegex = new RegExp("^(\\s*)(?:(" + bullets.map(function (x) { return "\\u" + x.charCodeAt(0).toString(16); }).join("|") + ")|(\\d{1,2})(\\)|\\.))?\\s*", "mg");
 
 	var findAny = function (source, chars, index, increment) {
 		while (index >= 0 && index < source.length) {
@@ -144,11 +144,19 @@
 			// maintain indentation on new lines
 			key: KEY_ENTER,
 			action: function (editor) {
-				var context = getSelectionContext(editor);
 				indentRegex.lastIndex = 0;
-				var match = indentRegex.exec(context.value);
-				if (match) {
-					insertText(editor, LF + match[1] + (match[3] !== undefined ? ++match[3] + match[4] : match[2]) + NBSP);
+				var context = getSelectionContext(editor),
+					match = indentRegex.exec(context.value),
+					indent;
+				if (match[3] !== undefined) {
+					indent = match[1] + (++match[3]) + match[4] + NBSP;
+				} else if (match[2] !== undefined) {
+					indent = match[1] + match[2] + NBSP;
+				} else if (match[1]) {
+					indent = match[1];
+				}
+				if (indent) {
+					insertText(editor, LF + indent);
 					return false;
 				}
 			}
