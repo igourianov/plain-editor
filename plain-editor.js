@@ -3,46 +3,36 @@
 		CR = "\r",
 		TAB = "\t";
 
-	var max = function () {
-		var ret;
-		for (var i = 0; i < arguments.length; i++) {
-			if (ret == undefined || ret < arguments[i]) {
-				ret = arguments[i];
+	var findAny = function (source, chars, start, increment) {
+		while (start >= 0 && start < source.length) {
+			for (var i = 0; i < chars.length; i++) {
+				if (chars[i] === source[start]) {
+					return start;
+				}
 			}
+			start += increment;
 		}
-		return ret;
+		return start;
 	};
 
-	var getSelection = function (obj) {
-		var start = obj.selectionStart,
-			end = obj.selectionEnd,
-			value = obj.value;
+	var getSelectionLines = function (editor) {
+		var start = editor.selectionStart,
+			end = editor.selectionEnd,
+			value = editor.value;
 
-		var sel = {
-			start: start,
-			end: end,
-			value: value.substring(start, end)
-		};
-
-		sel.lineStart = value.lastIndexOf(LF, start) + 1;
-		sel.lineEnd = value.indexOf(LF, end);
-		if (sel.lineEnd == -1) {
-			sel.lineEnd = value.length;
-		}
-		sel.lines = value.substring(sel.lineStart, sel.lineEnd).split(/(?:\r\n|\r|\n)/)
-		return sel;
+		start = findAny(value, [CR, LF], start, 1) + 1;
+		end = findAny(value, [CR, LF], end, -1);
+		var lines = value.substring(start, end).split(/(?:\r\n|\r|\n)/);
+		lines.start = start;
+		lines.end = end;
+		return lines;
 	};
 
-	var updateSelection = function (editor, selection) {
+	var insertText = function (editor, text) {
 		if (document.activeElement !== editor) {
 			editor.focus(); // required for insertText command to work
 		}
-		editor.selectionStart = selection.start;
-		editor.selectionEnd = selection.end;
-		document.execCommand("insertText", false, selection.value);
-		if (selection.value.length > 1) {
-			editor.selectionStart = selection.start; // insertText resets selection
-		}
+		document.execCommand("insertText", false, text);
 	};
 
 	$.fn.plainEditor = function () {
@@ -54,23 +44,25 @@
 					return false;
 				}
 				if (e.keyCode === 9 && !e.shiftKey) {
-					var sel = getSelection(editor);
-					if (sel.lines.length == 1) {
-						sel.value = TAB;
-						updateSelection(editor, sel);
+					var lines = getSelectionLines(editor);
+					if (lines.length == 1) {
+						insertText(editor, TAB);
 					} else {
-						for (var i = 0; i < sel.lines.length; i++) {
-							sel.lines[i] = TAB + sel.lines[i];
+						for (var i = 0; i < lines.length; i++) {
+							lines[i] = TAB + lines[i];
 						}
-						sel.value = sel.lines.join(LF);
-						sel.start = sel.lineStart;
-						sel.end = sel.lineEnd;
-						updateSelection(editor, sel);
+						var oldStart = editor.selectionStart + (oldStart !== lines.start ? 1 : 0),
+							oldEnd = editor.selectionEnd + lines.length;
+						editor.selectionStart = lines.start;
+						editor.selectionEnd = lines.end;
+						insertText(editor, lines.join(LF));
+						editor.selectionStart = oldStart;
+						editor.selectionEnd = oldEnd;
 					}
 					return false;
 				}
-				if (e.keyCode === 9 && e.shiftKey) {
-					var sel = getSelection(editor);
+				/*if (e.keyCode === 9 && e.shiftKey) {
+					var sel = getSelectionLines(editor);
 					for (var i = 0; i < sel.lines.length; i++) {
 						if (sel.lines[i].startsWith(TAB)) {
 							sel.lines[i] = sel.lines[i].substr(1);
@@ -78,13 +70,13 @@
 							sel.lines[i] = sel.lines[i].replace(/^ {1,4}/, "");
 						}
 					}
-					sel.value = sel.lines.join(LF);
-					sel.start = sel.lineStart;
-					sel.end = sel.lineEnd;
-					updateSelection(editor, sel);
+					editor.selectionStart = sel.start;
+					editor.selectionEnd = sel.end;
+					insertText(editor, sel.lines.join(LF));
+					//editor.selectionStart = sel.start; // reset selection after insert
 					return false;
-				}
+				}*/
 			});
 	};
 
-}(jQuery, undefined));
+}(jQuery));
