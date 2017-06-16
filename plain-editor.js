@@ -1,31 +1,30 @@
 (function ($) {
 	var LF = "\n",
 		CR = "\r",
-		TAB = "\t";
+		TAB = "\t",
+		NEWLINE_REGEX = /(?:\r\n|\r|\n)/;
 
-	var findAny = function (source, chars, start, increment) {
-		while (start >= 0 && start < source.length) {
+	var findAny = function (source, chars, index, increment) {
+		while (index >= 0 && index < source.length) {
 			for (var i = 0; i < chars.length; i++) {
-				if (chars[i] === source[start]) {
-					return start;
+				if (chars[i] === source[index]) {
+					return index;
 				}
 			}
-			start += increment;
+			index += increment;
 		}
-		return start;
+		return index;
 	};
 
-	var getSelectionLines = function (editor) {
+	var getSelectionContext = function (editor) {
 		var start = editor.selectionStart,
 			end = editor.selectionEnd,
 			value = editor.value;
-
-		start = findAny(value, [CR, LF], start, 1) + 1;
-		end = findAny(value, [CR, LF], end, -1);
-		var lines = value.substring(start, end).split(/(?:\r\n|\r|\n)/);
-		lines.start = start;
-		lines.end = end;
-		return lines;
+		return {
+			start: start = findAny(value, [CR, LF], start, 1) + 1,
+			end: end = findAny(value, [CR, LF], end, -1),
+			value: value.substring(start, end)
+		};
 	};
 
 	var insertText = function (editor, text) {
@@ -38,26 +37,34 @@
 	$.fn.plainEditor = function () {
 		return this.addClass("plain-editor")
 			.on("keydown", function (e) {
-				var editor = e.target;
+				var editor = e.target,
+					selection = editor.value.substring(editor.selectionStart, editor.selectionEnd);
+
 				if (e.keyCode === 13 && e.altKey) {
 					$(editor).toggleClass("full-screen");
 					return false;
 				}
+
 				if (e.keyCode === 9 && !e.shiftKey) {
-					var lines = getSelectionLines(editor);
-					if (lines.length == 1) {
+					
+					if (!selection.match(NEWLINE_REGEX)) {
 						insertText(editor, TAB);
 					} else {
-						for (var i = 0; i < lines.length; i++) {
-							lines[i] = TAB + lines[i];
-						}
-						var oldStart = editor.selectionStart + (oldStart !== lines.start ? 1 : 0),
-							oldEnd = editor.selectionEnd + lines.length;
-						editor.selectionStart = lines.start;
-						editor.selectionEnd = lines.end;
-						insertText(editor, lines.join(LF));
-						editor.selectionStart = oldStart;
-						editor.selectionEnd = oldEnd;
+						var context = getSelectionContext(editor);
+						var start = editor.selectionStart,
+							end = editor.selectionEnd;
+						var newValue = context.value.replace(/^/mg, function(match, index) {
+							if (index + context.start < start) {
+								start++;
+							}
+							end++;
+							return TAB;
+						});
+						editor.selectionStart = context.start;
+						editor.selectionEnd = context.end;
+						insertText(editor, newValue);
+						editor.selectionStart = start;
+						editor.selectionEnd = end;
 					}
 					return false;
 				}
