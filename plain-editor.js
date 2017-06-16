@@ -9,7 +9,11 @@
 		MOD_META = 8,
 		KEY_ENTER = "Enter",
 		KEY_TAB = "Tab",
-		KEY_ESC = "Escape";
+		KEY_ESC = "Escape",
+		NBSP = "\u00A0";
+
+	var bullets = ["\u2022", "\u25E6", "\u25A0", "\u25B8"];
+	var bulletRegex = /^(\s*)(\u2022|\u25E6|\u25A0|\u25B8)?\s*/mg;
 
 	var findAny = function (source, chars, index, increment) {
 		while (index >= 0 && index < source.length) {
@@ -108,6 +112,26 @@
 						}
 						selectionEnd -= match.length;
 						return "";
+					}));
+					editor.selectionStart = selectionStart;
+					editor.selectionEnd = selectionEnd;
+					return false;
+				}
+
+				// toggle bullet points
+				if (key === "*" && mods === (MOD_CTRL | MOD_SHIFT)) {
+					var context = getSelectionContext(editor);
+					editor.selectionStart = context.start;
+					editor.selectionEnd = context.end;
+					insertText(editor, context.value.replace(bulletRegex, function (match, indent, bullet, index) {
+						bullet = bullets[bullets.indexOf(bullet) + 1];
+						var ret = indent + (bullet ? bullet + NBSP : "");
+						var diff = ret.length - match.length;
+						if (selectionStart > index + context.start) {
+							selectionStart += diff;
+						}
+						selectionEnd += diff;
+						return ret;
 					}));
 					editor.selectionStart = selectionStart;
 					editor.selectionEnd = selectionEnd;
