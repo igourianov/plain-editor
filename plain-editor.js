@@ -164,11 +164,44 @@
 		{
 			key: KEY_ENTER,
 			mod: MOD_CTRL,
-			action: function(editor) {
+			action: function (editor) {
 				$(editor).closest("form").submit();
 			}
 		}
 	];
+
+	var blockElements = ["DIV", "P", "BLOCKQUOTE", "ARTICLE", "SECTION", "H1", "H2", "H3", "H4", "H6", "H6"];
+	var htmlToText = function (node, buffer, flags) {
+		for (var i = 0; i < node.childNodes.length; i++) {
+			var child = node.childNodes[i],
+				name = child.nodeName,
+				type = child.nodeType;
+			if (type === 3) {
+				buffer.push(child.nodeValue);
+				flags.newBlock = false;
+			}
+			else if (type === 1) {
+				if (child.nodeName === "LI") {
+					var bullet = flags.listOrdered ? (++flags.listCounter) + "." : bullets[(flags.listLevel - 1) % bullets.length];
+					buffer.push(LF + new Array(flags.listLevel + 1).join("\t") + bullet + NBSP);
+					flags.newBlock = true;
+				}
+				else if (!flags.newBlock && blockElements.indexOf(name) > -1) {
+					buffer.push(LF);
+					flags.newBlock = true;
+				}
+				else if (name === "OL" || name === "UL") {
+					flags.listLevel++;
+					flags.listOrdered = name === "OL";
+					flags.listCounter = 0;
+				}
+				htmlToText(child, buffer, flags);
+				if (name === "OL" || name === "UL") {
+					flags.listLevel--;
+				}
+			}
+		}
+	};
 
 	$.fn.plainEditor = function () {
 		return this.addClass("plain-editor")
@@ -176,11 +209,25 @@
 				var editor = e.target,
 					key = e.key,
 					mod = (+e.shiftKey * MOD_SHIFT) | (+e.altKey * MOD_ALT) | (+e.ctrlKey * MOD_CTRL) | (+e.metaKey * MOD_META);
-
 				for (var i = 0; i < behaviors.length; i++) {
 					var behavior = behaviors[i];
 					if (behavior.key === key && (behavior.mod || 0) === mod) {
 						return behavior.action(editor);
+					}
+				}
+			})
+			.on("paste", function (e) {
+				var items = e.originalEvent.clipboardData.items;
+				for (var i = 0; i < items.length; i++) {
+					if (items[i].kind === "string" && items[i].type === "text/html") {
+						items[i].getAsString(function (s) {
+							var frag = document.createElement("div");
+							frag.innerHTML = s;
+							var buffer = [];
+							htmlToText(node, buffer, { newBlock: false, listLevel: 0 });
+							insertText(e.target, buffer.join("").trim());
+						});
+						return false;
 					}
 				}
 			});
