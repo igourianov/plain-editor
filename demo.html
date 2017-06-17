@@ -1,47 +1,61 @@
 <html>
-	<head>
-		<meta charset="utf-8" /> 
-		<link rel="stylesheet" href="plain-editor.css" />
-		<link rel="stylesheet" href="theme/default.css" />
-		<style>
+<head>
+	<meta charset="utf-8" />
+	<title>plain-editor demo</title>
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/normalize/7.0.0/normalize.min.css" />
+	<link rel="stylesheet" href="plain-editor.css" />
+	<link rel="stylesheet" href="theme/default.css" />
+	<style>
 body {
-	margin: 200px auto;
-	width: 500px;
+	margin: 50px 100px;
 }
 
 textarea {
 	display: block;
-	width: 400px;
-	height: 200px;
+	height: 300px;
+	width: 600px;
 }
-		</style>
-		<script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
-		<script src="plain-editor.js"></script>
-	</head>
-	<body>
-		<form>
-			<textarea spellcheck="false">This is a plain old TEXTAREA control that now supports basic formatting tools.
+
+p#preview {
+	white-space: pre-wrap;
+}
+	</style>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script src="plain-editor.js"></script>
+</head>
+<body>
+	<h2>plain-editor demo</h2>
+	<form>
+		<textarea spellcheck="false">This is a plain old TEXTAREA control that now supports basic formatting tools.
+
 Action keys:
 	• Alt+Enter	Toggle full screen mode
 	• Ctrl+Enter	Submit parent form (if present)
 	• Tab		Indent selected lines
 	• Shift+Tab	Reduce indentation on selected lines
-	• Escape	Close full screen mode if it is open. Otherwise exit focus from the control - this is needed to continue Tab-bing on the page.
+	• Escape		Close full screen mode if it is open. Otherwise exit focus from the control - this is needed to continue Tab-bing on the page.
 	• Ctrl+Shift+8	Toggle between 4 different bullet point modes, and no bullets
 	• Ctrl+Shift+7	Toggle numbered list mode
 	
-The editor will also automatically maintain indentation and lists when entering new line.</textarea>
-		</form>
-		<script>
-			$(function() {
-				$("textarea").plainEditor()
-					.addClass("theme-default full-screen")
-					.focus();
-				$("form").on("submit", function() {
-					alert("Form submit!");
-					return false;
-				});
-			});
-		</script>
-	</body>
+The editor will also automatically maintain indentation and lists when entering new line.
+
+To display this text in HTML simply use 'white-space:pre-wrap' rule.</textarea>
+	</form>
+	<p id="preview"></p>
+	<script>
+$(function () {
+	var preview = $("#preview");
+	$("textarea").plainEditor()
+		.addClass("theme-default")
+		.on("input", function () {
+			preview.text(this.value);
+		})
+		.focus();
+	$("form").on("submit", function () {
+		alert("Form submit!");
+		return false;
+	});
+});
+	</script>
+</body>
 </html>
