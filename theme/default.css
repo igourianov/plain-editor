@@ -6,6 +6,9 @@ textarea.plain-editor.theme-default {
 }
 
 textarea.plain-editor.theme-default.full-screen {
-	padding: 2vmax;
+	padding: 1em;
 	font-size: 2vmax;
+	opacity: 0.95;
+	border: 0;
+	outline: none;
 }
