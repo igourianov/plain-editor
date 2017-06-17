@@ -50,7 +50,7 @@
 		var context = getSelectionContext(editor);
 		var value = context.value.replace(regex, function (match) {
 			var index = arguments[arguments.length - 2] + context.start;
-			var ret = replacer.apply(this, arguments);
+			var ret = replacer.apply ? replacer.apply(this, arguments) : replacer;
 			var diff = ret.length - match.length;
 			if (selectionStart > index) {
 				selectionStart += diff;
@@ -96,7 +96,7 @@
 				if (!selection.match(/(?:\r\n|\r|\n)/)) {
 					insertText(editor, TAB);
 				} else {
-					transformContext(editor, /^/mg, function () { return TAB; });
+					transformContext(editor, /^/mg, TAB);
 				}
 				return false;
 			}
@@ -106,7 +106,7 @@
 			key: KEY_TAB,
 			mod: MOD_SHIFT,
 			action: function (editor) {
-				transformContext(editor, /^(?:\t| {1,4})/mg, function () { return ""; });
+				transformContext(editor, /^(?:\t| {1,4})/mg, "");
 				return false;
 			}
 		},
