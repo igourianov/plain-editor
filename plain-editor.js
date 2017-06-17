@@ -170,37 +170,39 @@
 		}
 	];
 
-	var blockElements = ["DIV", "P", "BLOCKQUOTE", "ARTICLE", "SECTION", "H1", "H2", "H3", "H4", "H6", "H6"];
-	var htmlToText = function (node, buffer, flags) {
-		for (var i = 0; i < node.childNodes.length; i++) {
-			var child = node.childNodes[i],
-				name = child.nodeName,
-				type = child.nodeType;
-			if (type === 3) {
-				buffer.push(child.nodeValue);
-				flags.newBlock = false;
-			}
-			else if (type === 1) {
-				if (child.nodeName === "LI") {
-					var bullet = flags.listOrdered ? (++flags.listCounter) + "." : bullets[(flags.listLevel - 1) % bullets.length];
-					buffer.push(LF + new Array(flags.listLevel + 1).join("\t") + bullet + NBSP);
-					flags.newBlock = true;
-				}
-				else if (!flags.newBlock && blockElements.indexOf(name) > -1) {
-					buffer.push(LF);
-					flags.newBlock = true;
-				}
-				else if (name === "OL" || name === "UL") {
-					flags.listLevel++;
-					flags.listOrdered = name === "OL";
-					flags.listCounter = 0;
-				}
-				htmlToText(child, buffer, flags);
-				if (name === "OL" || name === "UL") {
-					flags.listLevel--;
-				}
-			}
+	var blockElements = ["DIV", "P", "LI", "UL", "OL", "BLOCKQUOTE", "ARTICLE", "SECTION", "H1", "H2", "H3", "H4", "H6", "H6", "BR"];
+	var htmlToText = function (node, buffer, listFlags, parentEmpty) {
+		var name = node.nodeName,
+			type = node.nodeType;
+
+		if (type === 3) {
+			buffer.push(node.nodeValue);
+			return !!node.nodeValue.trim();
 		}
+		if (type !== 1) {
+			return false;
+		}
+		if (!parentEmpty && blockElements.indexOf(name) > -1) {
+			buffer.push(LF);
+			parentEmpty = true;
+		}
+		if (name === "OL" || name === "UL") {
+			listFlags = {
+				level: listFlags.level + 1,
+				counter: 0,
+				ordered: name === "OL"
+			};
+		}
+		else if (name === "LI") {
+			var bullet = listFlags.ordered ? (++listFlags.counter) + "." : bullets[(listFlags.level - 1) % bullets.length];
+			buffer.push(new Array(listFlags.level + 1).join("\t") + bullet + NBSP);
+			parentEmpty = true;
+		}
+
+		for (var i = 0; i < node.childNodes.length; i++) {
+			parentEmpty = !htmlToText(node.childNodes[i], buffer, listFlags, parentEmpty) && parentEmpty;
+		}
+		return !parentEmpty;
 	};
 
 	$.fn.plainEditor = function () {
@@ -223,9 +225,10 @@
 						items[i].getAsString(function (s) {
 							var node = document.createElement("div");
 							node.innerHTML = s;
+							console.log(node);
 							var buffer = [];
-							htmlToText(node, buffer, { newBlock: false, listLevel: 0 });
-							insertText(e.target, buffer.join("").trim());
+							htmlToText(node, buffer, { level: 0, counter: 0 }, true);
+							insertText(e.target, buffer.join(""));//.trim());
 						});
 						return false;
 					}
