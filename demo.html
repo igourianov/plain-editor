@@ -26,7 +26,7 @@ p#preview {
 <body>
 	<h2>plain-editor demo</h2>
 	<form>
-		<textarea spellcheck="false">This is a plain old TEXTAREA control that now supports basic formatting tools.
+		<textarea id="editor" spellcheck="false">This is a plain old TEXTAREA control that now supports basic formatting tools.
 
 Action keys:
 	• Alt+Enter	Toggle full screen mode
@@ -41,15 +41,12 @@ The editor will also automatically maintain indentation and lists when entering 
 
 To display this text in HTML simply use 'white-space:pre-wrap' rule.</textarea>
 	</form>
-	<p id="preview"></p>
+	<h2>regular textarea (for comparison)</h2>
+	<textarea></textarea>
 	<script>
 $(function () {
-	var preview = $("#preview");
-	$("textarea").plainEditor()
+	$("#editor").plainEditor()
 		.addClass("theme-default")
-		.on("input", function () {
-			preview.text(this.value);
-		})
 		.focus();
 	$("form").on("submit", function () {
 		alert("Form submit!");
