@@ -221,8 +221,8 @@
 				for (var i = 0; i < items.length; i++) {
 					if (items[i].kind === "string" && items[i].type === "text/html") {
 						items[i].getAsString(function (s) {
-							var frag = document.createElement("div");
-							frag.innerHTML = s;
+							var node = document.createElement("div");
+							node.innerHTML = s;
 							var buffer = [];
 							htmlToText(node, buffer, { newBlock: false, listLevel: 0 });
 							insertText(e.target, buffer.join("").trim());
