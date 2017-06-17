@@ -171,7 +171,7 @@
 	];
 
 	var blockElements = ["DIV", "P", "LI", "UL", "OL", "BLOCKQUOTE", "ARTICLE", "SECTION", "H1", "H2", "H3", "H4", "H6", "H6", "BR"];
-	var htmlToText = function (node, buffer, listFlags, parentEmpty) {
+	var htmlToText = function (node, buffer, listFlags, blockEmpty) {
 		var name = node.nodeName,
 			type = node.nodeType;
 
@@ -182,9 +182,9 @@
 		if (type !== 1) {
 			return false;
 		}
-		if (!parentEmpty && blockElements.indexOf(name) > -1) {
+		if (!blockEmpty && blockElements.indexOf(name) > -1) {
 			buffer.push(LF);
-			parentEmpty = true;
+			blockEmpty = true;
 		}
 		if (name === "OL" || name === "UL") {
 			listFlags = {
@@ -196,13 +196,17 @@
 		else if (name === "LI") {
 			var bullet = listFlags.ordered ? (++listFlags.counter) + "." : bullets[(listFlags.level - 1) % bullets.length];
 			buffer.push(new Array(listFlags.level + 1).join("\t") + bullet + NBSP);
-			parentEmpty = true;
 		}
 
 		for (var i = 0; i < node.childNodes.length; i++) {
-			parentEmpty = !htmlToText(node.childNodes[i], buffer, listFlags, parentEmpty) && parentEmpty;
+			blockEmpty = !htmlToText(node.childNodes[i], buffer, listFlags, blockEmpty) && blockEmpty;
 		}
-		return !parentEmpty;
+		
+		if (name === "P" && !blockEmpty) {
+			buffer.push(LF);
+		}
+
+		return !blockEmpty;
 	};
 
 	$.fn.plainEditor = function () {
