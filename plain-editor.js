@@ -197,16 +197,28 @@
 			var bullet = listFlags.ordered ? (++listFlags.counter) + "." : bullets[(listFlags.level - 1) % bullets.length];
 			buffer.push(new Array(listFlags.level + 1).join("\t") + bullet + NBSP);
 		}
-
 		for (var i = 0; i < node.childNodes.length; i++) {
 			blockEmpty = !htmlToText(node.childNodes[i], buffer, listFlags, blockEmpty) && blockEmpty;
 		}
-		
 		if (name === "P" && !blockEmpty) {
 			buffer.push(LF);
 		}
-
 		return !blockEmpty;
+	};
+
+	var pasteHtml = function (editor, html) {
+		var buffer = [],
+			node = document.createElement("div");
+		node.innerHTML = html;
+		// remove empty text nodes left after DIV dropped the HTML and BODY tags on parsing
+		for (var i = node.childNodes.length - 1; i >= 0; i--) {
+			var child = node.childNodes[i]
+			if (child.nodeType !== 1) {
+				node.removeChild(child);
+			}
+		}
+		htmlToText(node, buffer, { level: 0, counter: 0 }, true);
+		insertText(editor, buffer.join(""));
 	};
 
 	$.fn.plainEditor = function () {
@@ -226,13 +238,8 @@
 				var items = e.originalEvent.clipboardData.items;
 				for (var i = 0; i < items.length; i++) {
 					if (items[i].kind === "string" && items[i].type === "text/html") {
-						items[i].getAsString(function (s) {
-							var node = document.createElement("div");
-							node.innerHTML = s;
-							console.log(node);
-							var buffer = [];
-							htmlToText(node, buffer, { level: 0, counter: 0 }, true);
-							insertText(e.target, buffer.join(""));//.trim());
+						items[i].getAsString(function (str) {
+							pasteHtml(e.target, str);
 						});
 						return false;
 					}
