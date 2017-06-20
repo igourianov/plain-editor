@@ -12,7 +12,7 @@
 		NBSP = "\u00A0";
 
 	var bullets = ["\u2022", "\u25E6", "\u25A0", "\u25B8"];
-	var indentRegex = new RegExp("^(\\s*)(?:(" + bullets.map(function (x) { return "\\u" + x.charCodeAt(0).toString(16); }).join("|") + ")|(\\d{1,2})(\\)|\\.))?\\s*", "mg");
+	var indentRegex = new RegExp("^([^\\S\\r\\n]*)(?:(" + bullets.map(function (x) { return "\\u" + x.charCodeAt(0).toString(16); }).join("|") + ")|(\\d{1,2})(\\)|\\.))?[^\\S\\r\\n]*", "mg");
 
 	var findAny = function (source, chars, index, increment) {
 		while (index >= 0 && index < source.length) {
@@ -212,7 +212,7 @@
 		node.innerHTML = html;
 		// remove empty text nodes left after DIV dropped the HTML and BODY tags on parsing
 		for (var i = node.childNodes.length - 1; i >= 0; i--) {
-			var child = node.childNodes[i]
+			var child = node.childNodes[i];
 			if (child.nodeType !== 1) {
 				node.removeChild(child);
 			}
