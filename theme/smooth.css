@@ -1,11 +1,11 @@
 
-textarea.plain-editor.theme-default {
+textarea.plain-editor.theme-smooth {
 	color: #333;
 	padding: 0.5em;
 	transition: font-size 100ms ease-out;
 }
 
-textarea.plain-editor.theme-default.full-screen {
+textarea.plain-editor.theme-smooth.full-screen {
 	padding: 1em;
 	font-size: 2vmax;
 	opacity: 0.95;
