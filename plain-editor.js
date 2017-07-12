@@ -67,13 +67,32 @@
 		editor.selectionEnd = selectionEnd;
 	};
 
+	var getWrapper = function (textarea) {
+		return textarea.parentNode.parentNode;
+	};
+
+	var getTextarea = function (wrapper) {
+		return wrapper.firstChild.firstChild;
+	};
+
+	var debounce = function (func, timeout) {
+		var handle;
+		return function () {
+			var scope = this, args = arguments;
+			if (handle) {
+				clearTimeout(handle);
+			}
+			handle = setTimeout(function () { handle = null; func.apply(scope, args); }, timeout);
+		};
+	};
+
 	var behaviors = [
 		{
 			// toggle full screen mode
 			key: KEY_ENTER,
 			mod: MOD_ALT,
 			action: function (editor) {
-				$(editor).toggleClass("full-screen");
+				$(getWrapper(editor)).toggleClass("full-screen");
 				return false;
 			}
 		},
@@ -81,8 +100,8 @@
 			// close full screen or exit focus (to compensate for Tab overridden action)
 			key: KEY_ESC,
 			action: function (editor) {
-				if ($(editor).is(".full-screen")) {
-					$(editor).removeClass("full-screen");
+				if ($(getWrapper(editor)).is(".full-screen")) {
+					$(getWrapper(editor)).removeClass("full-screen");
 				} else {
 					editor.blur();
 				}
@@ -221,8 +240,13 @@
 		insertText(editor, buffer.join(""));
 	};
 
+	var toolbar = null, getToolbar = function () {
+		return toolbar || (toolbar = $("<div class='plain-editor-toolbar'/>")
+			.append("<div class='full-screen' tabIndex=0>[]</div>"));
+	};
+
 	$.fn.plainEditor = function () {
-		return this.addClass("plain-editor")
+		return this
 			.on("keydown", function (e) {
 				var editor = e.target,
 					key = e.key,
@@ -244,7 +268,17 @@
 						return false;
 					}
 				}
-			});
+			})
+			.wrap("<div class='floater'/>").parent().wrap("<div class='plain-editor'/>").parent()
+			.on("focusin focusout", debounce(function (e) {
+				if (e.type == "focusout"){
+					$(this).removeClass("focus");
+				}
+				else if (e.target === getTextarea(this)) {
+					getToolbar().insertAfter(getTextarea(this));
+					$(this).addClass("focus");
+				}
+			}, 100));
 	};
 
 }(jQuery, document));

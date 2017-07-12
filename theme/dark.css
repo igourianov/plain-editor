@@ -1,11 +1,11 @@
 
-textarea.plain-editor.theme-dark {
+.plain-editor.theme-dark textarea {
 	color: #333;
 	padding: 0.5em;
 	transition: background-color 200ms ease-in-out;
 }
 
-textarea.plain-editor.theme-dark.full-screen {
+.plain-editor.theme-dark.full-screen textarea {
 	padding: 1em;
 	font-size: 2vmax;
 	color: #d4d4d4;
