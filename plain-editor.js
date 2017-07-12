@@ -9,9 +9,12 @@
 		KEY_ENTER = "Enter",
 		KEY_TAB = "Tab",
 		KEY_ESC = "Escape",
-		NBSP = "\u00A0";
+		NBSP = "\u00A0",
+		bullets = ["\u2022", "\u25E6", "\u25A0", "\u25B8"],
+		fullScreen, indent, unindent, bulletList, numberList;
 
-	var bullets = ["\u2022", "\u25E6", "\u25A0", "\u25B8"];
+
+
 	var indentRegex = new RegExp("^([^\\S\\r\\n]*)(?:(" + bullets.map(function (x) { return "\\u" + x.charCodeAt(0).toString(16); }).join("|") + ")|(\\d{1,2})(\\)|\\.))?[^\\S\\r\\n]*", "mg");
 
 	var findAny = function (source, chars, index, increment) {
@@ -91,7 +94,7 @@
 			// toggle full screen mode
 			key: KEY_ENTER,
 			mod: MOD_ALT,
-			action: function (editor) {
+			action: fullScreen = function (editor) {
 				$(getWrapper(editor)).toggleClass("full-screen");
 				return false;
 			}
@@ -241,8 +244,17 @@
 	};
 
 	var toolbar = null, getToolbar = function () {
-		return toolbar || (toolbar = $("<div class='plain-editor-toolbar'/>")
-			.append("<div class='full-screen' tabIndex=0>[]</div>"));
+		return toolbar || (toolbar = $("<div class='toolbar'/>")
+			.append("<div class='full-screen' tabIndex=0>full screen</div>")
+			.append("<div class='indent' tabIndex=0>indent</div>")
+			.on("click", "> *", function(e) {
+				var textarea = this.parentNode.previousSibling;
+				switch (e.target.className) {
+					case "full-screen":
+						fullScreen(textarea);
+						break;
+				}
+			}));
 	};
 
 	$.fn.plainEditor = function () {
@@ -276,7 +288,10 @@
 				}
 				else if (e.target === getTextarea(this)) {
 					getToolbar().insertAfter(getTextarea(this));
-					$(this).addClass("focus");
+					var self = this;
+					setTimeout(function() {
+						$(self).addClass("focus");
+					}, 10);
 				}
 			}, 100));
 	};
