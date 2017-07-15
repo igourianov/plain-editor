@@ -10,12 +10,11 @@
 		KEY_TAB = "Tab",
 		KEY_ESC = "Escape",
 		NBSP = "\u00A0",
+		toolbar,
+		uid = 0,
 		bullets = ["\u2022", "\u25E6", "\u25A0", "\u25B8"],
-		fullScreen, indent, unindent, bulletList, numberList;
-
-
-
-	var indentRegex = new RegExp("^([^\\S\\r\\n]*)(?:(" + bullets.map(function (x) { return "\\u" + x.charCodeAt(0).toString(16); }).join("|") + ")|(\\d{1,2})(\\)|\\.))?[^\\S\\r\\n]*", "mg");
+		blockElements = ["DIV", "P", "LI", "UL", "OL", "BLOCKQUOTE", "ARTICLE", "SECTION", "H1", "H2", "H3", "H4", "H6", "H6", "BR"],
+		indentRegex = new RegExp("^([^\\S\\r\\n]*)(?:(" + bullets.map(function (x) { return "\\u" + x.charCodeAt(0).toString(16); }).join("|") + ")|(\\d{1,2})(\\)|\\.))?[^\\S\\r\\n]*", "mg");
 
 	var findAny = function (source, chars, index, increment) {
 		while (index >= 0 && index < source.length) {
@@ -78,121 +77,123 @@
 		return wrapper.firstChild.firstChild;
 	};
 
-	var debounce = function (func, timeout) {
-		var handle;
+	var debounce = function (func, timeout, selector) {
+		var handle = {};
 		return function () {
-			var scope = this, args = arguments;
-			if (handle) {
-				clearTimeout(handle);
+			var scope = this,
+				args = arguments,
+				key = selector && selector.apply(scope, args) || "";
+			console.log(key);
+			if (handle[key]) {
+				clearTimeout(handle[key]);
 			}
-			handle = setTimeout(function () { handle = null; func.apply(scope, args); }, timeout);
+			handle[key] = setTimeout(function () {
+				handle[key] = null;
+				func.apply(scope, args);
+			}, timeout);
 		};
 	};
 
-	var behaviors = [
-		{
-			// toggle full screen mode
-			key: KEY_ENTER,
-			mod: MOD_ALT,
-			action: fullScreen = function (editor) {
-				$(getWrapper(editor)).toggleClass("full-screen");
-				return false;
-			}
-		},
-		{
-			// close full screen or exit focus (to compensate for Tab overridden action)
-			key: KEY_ESC,
-			action: function (editor) {
-				if ($(getWrapper(editor)).is(".full-screen")) {
-					$(getWrapper(editor)).removeClass("full-screen");
-				} else {
-					editor.blur();
-				}
-			}
-		},
-		{
-			// indent text
-			key: KEY_TAB,
-			action: function (editor) {
-				var selection = editor.value.substring(editor.selectionStart, editor.selectionEnd);
-				if (!selection.match(/(?:\r\n|\r|\n)/)) {
-					insertText(editor, TAB);
-				} else {
-					transformContext(editor, /^/mg, TAB);
-				}
-				return false;
-			}
-		},
-		{
-			// decrease indentation
-			key: KEY_TAB,
-			mod: MOD_SHIFT,
-			action: function (editor) {
-				transformContext(editor, /^(?:\t| {1,4})/mg, "");
-				return false;
-			}
-		},
-		{
-			// toggle bullet points
-			key: "*",
-			mod: MOD_CTRL | MOD_SHIFT,
-			action: function (editor) {
-				transformContext(editor, indentRegex, function (match, indent, bullet, digit, separator, index) {
-					bullet = bullets[bullets.indexOf(bullet) + 1];
-					return indent + (bullet ? bullet + NBSP : "");
-				});
-				return false;
-			}
-		},
-		{
-			// toggle ordered list
-			key: "&",
-			mod: MOD_CTRL | MOD_SHIFT,
-			action: function (editor) {
-				var counter = 0, toggle;
-				transformContext(editor, indentRegex, function (match, indent, bullet, digit, separator, index) {
-					if (toggle === undefined) {
-						toggle = !digit;
-					}
-					if (toggle) {
-						return indent + (++counter) + "." + NBSP;
-					}
-					return indent;
-				});
-				return false;
-			}
-		},
-		{
-			// maintain indentation on new lines
-			key: KEY_ENTER,
-			action: function (editor) {
-				indentRegex.lastIndex = 0;
-				var context = getSelectionContext(editor),
-					match = indentRegex.exec(context.value),
-					indent;
-				if (match[3] !== undefined) {
-					indent = match[1] + (++match[3]) + match[4] + NBSP;
-				} else if (match[2] !== undefined) {
-					indent = match[1] + match[2] + NBSP;
-				} else if (match[1]) {
-					indent = match[1];
-				}
-				if (indent) {
-					insertText(editor, LF + indent);
-					return false;
-				}
-			}
-		},
-		{
-			key: KEY_ENTER,
-			mod: MOD_CTRL,
-			action: function (editor) {
-				$(editor).closest("form").submit();
+	var behaviors = [{
+		// toggle full screen mode
+		key: KEY_ENTER,
+		mod: MOD_ALT,
+		type: "full-screen",
+		action: function (editor) {
+			$(getWrapper(editor)).toggleClass("full-screen");
+			return false;
+		}
+	}, {
+		// close full screen or exit focus (to compensate for Tab overridden action)
+		key: KEY_ESC,
+		action: function (editor) {
+			if ($(getWrapper(editor)).is(".full-screen")) {
+				$(getWrapper(editor)).removeClass("full-screen");
+			} else {
+				editor.blur();
 			}
 		}
-	];
+	}, {
+		// indent text
+		key: KEY_TAB,
+		type: "indent",
+		action: function (editor) {
+			var selection = editor.value.substring(editor.selectionStart, editor.selectionEnd);
+			if (!selection.match(/(?:\r\n|\r|\n)/)) {
+				insertText(editor, TAB);
+			} else {
+				transformContext(editor, /^/mg, TAB);
+			}
+			return false;
+		}
+	}, {
+		// decrease indentation
+		key: KEY_TAB,
+		mod: MOD_SHIFT,
+		type: "unindent",
+		action: function (editor) {
+			transformContext(editor, /^(?:\t| {1,4})/mg, "");
+			return false;
+		}
+	}, {
+		// toggle bullet points
+		key: "*",
+		mod: MOD_CTRL | MOD_SHIFT,
+		type: "bullets",
+		action: function (editor) {
+			transformContext(editor, indentRegex, function (match, indent, bullet, digit, separator, index) {
+				bullet = bullets[bullets.indexOf(bullet) + 1];
+				return indent + (bullet ? bullet + NBSP : "");
+			});
+			return false;
+		}
+	}, {
+		// toggle ordered list
+		key: "&",
+		mod: MOD_CTRL | MOD_SHIFT,
+		type: "ordered-list",
+		action: function (editor) {
+			var counter = 0,
+				toggle;
+			transformContext(editor, indentRegex, function (match, indent, bullet, digit, separator, index) {
+				if (toggle === undefined) {
+					toggle = !digit;
+				}
+				if (toggle) {
+					return indent + (++counter) + "." + NBSP;
+				}
+				return indent;
+			});
+			return false;
+		}
+	}, {
+		// maintain indentation on new lines
+		key: KEY_ENTER,
+		action: function (editor) {
+			indentRegex.lastIndex = 0;
+			var context = getSelectionContext(editor),
+				match = indentRegex.exec(context.value),
+				indent;
+			if (match[3] !== undefined) {
+				indent = match[1] + (++match[3]) + match[4] + NBSP;
+			} else if (match[2] !== undefined) {
+				indent = match[1] + match[2] + NBSP;
+			} else if (match[1]) {
+				indent = match[1];
+			}
+			if (indent) {
+				insertText(editor, LF + indent);
+				return false;
+			}
+		}
+	}, {
+		key: KEY_ENTER,
+		mod: MOD_CTRL,
+		action: function (editor) {
+			$(editor).closest("form").submit();
+		}
+	}];
 
-	var blockElements = ["DIV", "P", "LI", "UL", "OL", "BLOCKQUOTE", "ARTICLE", "SECTION", "H1", "H2", "H3", "H4", "H6", "H6", "BR"];
 	var htmlToText = function (node, buffer, listFlags, blockEmpty) {
 		var name = node.nodeName,
 			type = node.nodeType;
@@ -214,8 +215,7 @@
 				counter: 0,
 				ordered: name === "OL"
 			};
-		}
-		else if (name === "LI") {
+		} else if (name === "LI") {
 			var bullet = listFlags.ordered ? (++listFlags.counter) + "." : bullets[(listFlags.level - 1) % bullets.length];
 			buffer.push(new Array(listFlags.level + 1).join("\t") + bullet + NBSP);
 		}
@@ -243,18 +243,23 @@
 		insertText(editor, buffer.join(""));
 	};
 
-	var toolbar = null, getToolbar = function () {
-		return toolbar || (toolbar = $("<div class='toolbar'/>")
-			.append("<div class='full-screen' tabIndex=0>full screen</div>")
-			.append("<div class='indent' tabIndex=0>indent</div>")
-			.on("click", "> *", function(e) {
+	var getToolbar = function () {
+		if (!toolbar) {
+			toolbar = $("<div class='toolbar'/>").on("click", "> *", function (e) {
 				var textarea = this.parentNode.previousSibling;
-				switch (e.target.className) {
-					case "full-screen":
-						fullScreen(textarea);
-						break;
-				}
-			}));
+				behaviors.filter(function (b) {
+					return b.type === this.className;
+				}, this).forEach(function (b) {
+					b.action(textarea);
+				});
+			});
+			behaviors.filter(function (b) {
+				return !!b.type;
+			}).forEach(function (b) {
+				$("<div tabIndex=0/>").addClass(b.type).appendTo(toolbar);
+			})
+		}
+		return toolbar;
 	};
 
 	$.fn.plainEditor = function () {
@@ -281,19 +286,21 @@
 					}
 				}
 			})
-			.wrap("<div class='floater'/>").parent().wrap("<div class='plain-editor'/>").parent()
+			.wrap("<div class='floater'/>").parent()
+			.wrap("<div class='plain-editor'/>").parent().attr("id", function () { return "plain-editor-" + (++uid); })
 			.on("focusin focusout", debounce(function (e) {
-				if (e.type == "focusout"){
+				if (e.type == "focusout") {
 					$(this).removeClass("focus");
-				}
-				else if (e.target === getTextarea(this)) {
+				} else if (e.target === getTextarea(this)) {
 					getToolbar().insertAfter(getTextarea(this));
 					var self = this;
-					setTimeout(function() {
+					setTimeout(function () {
 						$(self).addClass("focus");
 					}, 10);
 				}
-			}, 100));
+			}, 100, function (e) {
+				return this.id;
+			}));
 	};
 
 }(jQuery, document));

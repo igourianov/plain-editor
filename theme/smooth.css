@@ -1,12 +1,70 @@
 
-textarea.plain-editor.theme-smooth {
+.plain-editor.theme-smooth textarea {
 	color: #333;
+	border: 1px solid #333;
 	padding: 0.5em;
+	font-size: 1em;
 	transition: font-size 100ms ease-out;
 }
 
-textarea.plain-editor.theme-smooth.full-screen {
-	padding: 1em;
+.plain-editor.theme-smooth.full-screen {
 	font-size: 2vmax;
+}
+
+.plain-editor.theme-smooth.full-screen textarea {
+	padding: 1em;
 	opacity: 0.95;
+	font-size: 2vmax;
+}
+
+
+
+
+
+.plain-editor.theme-smooth .toolbar {
+	display: block;
+	border-radius: 3px;
+	right: 20px;
+	opacity: 0;
+	bottom: -2em;
+	line-height: 1em;
+	background-color: rgba(0, 0, 0, .4);
+	color: white;
+	transition-property: opacity, bottom;
+	transition-duration: 200ms;
+	transition-timing-function: ease-in, cubic-bezier(0.7, -0.55, 0.3, 1.55);
+}
+
+.plain-editor.theme-smooth.focus .toolbar {
+	opacity: 1;
+	bottom: 2px;
+}
+
+.plain-editor.theme-smooth .toolbar > * {
+	float: left;
+	cursor: pointer;
+	border: .5em solid transparent;
+	width: 1em;
+	text-align: center;
+	/* disable text selection. Taken from: https://stackoverflow.com/questions/826782/how-to-disable-text-selection-highlighting-using-css#4407335 */
+	-webkit-touch-callout: none; /* iOS Safari */
+	-webkit-user-select: none; /* Safari */
+	-khtml-user-select: none; /* Konqueror HTML */
+	-moz-user-select: none; /* Firefox */
+	-ms-user-select: none; /* Internet Explorer/Edge */
+	user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
+}
+
+
+
+.plain-editor.theme-smooth .toolbar > .full-screen:before {
+	content: "f";
+}
+
+.plain-editor.theme-smooth .toolbar > .indent:before {
+	content: "i";
+}
+
+.plain-editor.theme-smooth .toolbar > .unindent:before {
+	content: "u";
 }

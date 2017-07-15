@@ -46,9 +46,8 @@ To display this text in HTML simply use 'white-space:pre-wrap' rule.</textarea>
 	<textarea id="textarea"></textarea>
 	<script>
 $(function () {
-	$("#editor").plainEditor()
-		.addClass("theme-dark")
-		.focus();
+	$("textarea").plainEditor()
+		.addClass("theme-smooth");
 	$("form").on("submit", function () {
 		alert("Form submit!");
 		return false;
