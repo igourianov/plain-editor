@@ -3,11 +3,10 @@
 	color: #333;
 	border: 1px solid #333;
 	padding: 0.5em;
-	font-size: 1em;
-	transition: width .1s ease-in 0s, height .1s ease-in 0s;
 }
 
-.plain-editor.theme-default.full-screen textarea.full-screen {
+.plain-editor.theme-default.full-screen textarea {
+	transition: width .1s ease-in 0s, height .1s ease-in 0s;
 	padding: 1em;
 	opacity: 0.95;
 	font-size: 2vmax;
