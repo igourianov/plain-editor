@@ -25,7 +25,6 @@ p#preview {
 	<script src="plain-editor.js"></script>
 </head>
 <body>
-	<input type=text placeholder="dummy input for Tab testing"/>
 	<h2>plain-editor demo</h2>
 	<form>
 		<textarea id="editor" spellcheck="false">This is a plain old TEXTAREA control that now supports basic formatting tools.
@@ -44,10 +43,10 @@ The editor will also automatically maintain indentation and lists when entering 
 To display this text in HTML simply use 'white-space:pre-wrap' rule.</textarea>
 	</form>
 	<h2>regular textarea (for comparison)</h2>
-	<textarea id="textarea"></textarea>
+	<textarea></textarea>
 	<script>
 $(function () {
-	$("textarea").plainEditor()
+	$("#editor").plainEditor()
 		.addClass("theme-default theme-dark-full-screen");
 	$("form").on("submit", function () {
 		alert("Form submit!");
