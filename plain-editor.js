@@ -294,25 +294,14 @@
 				}
 			})
 			.each(function () {
-				var next = this.nextSibling,
-					parent = this.parentNode,
-					container = document.createElement("div"),
-					floater = document.createElement("div"),
-					placeholder = document.createElement("div");
-				container.className = (this.className || "") + " plain-editor";
-				this.className = "";
-				container.id = ++uid;
-				container.appendChild(floater);
-				floater.className = "floater";
-				floater.appendChild(this);
-				placeholder.className = "placeholder";
-				container.appendChild(placeholder);
-				if (next) {
-					parent.insertBefore(container, next);
-				} else {
-					parent.appendChild(container);
-				}
-			}).closest(".plain-editor")
+				$("<div class='plain-editor'><div class='floater'/><div class='placeholder'/></div>")
+					.attr("id", this.id || ("plain-editor" + (++uid)))
+					.addClass(this.className)
+					.insertAfter(this)
+					.children(".floater").append(this);
+			})
+			.attr({ id: null, class: null })
+			.closest(".plain-editor")
 			.on("focusin focusout", debounce(function (e) {
 				if (e.type == "focusout") {
 					$(this).removeClass("focus");
