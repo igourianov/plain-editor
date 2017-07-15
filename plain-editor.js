@@ -70,6 +70,13 @@
 		textarea.selectionEnd = selectionEnd;
 	};
 
+	var async = function (func, scope) {
+		var args = arguments, scope = scope || this;
+		setTimeout(function () {
+			func.apply(scope, args);
+		}, 10);
+	};
+
 	var debounce = function (func, timeout, selector) {
 		var handle = {};
 		return function () {
@@ -92,15 +99,20 @@
 		mod: MOD_ALT,
 		type: "full-screen",
 		action: function (textarea) {
-			var wrapper = $(textarea).closest("." + wrapperClass);
-			if (wrapper.not(".full-screen")) {
+			var ta = $(textarea),
+				wrapper = ta.closest("." + wrapperClass);
+			if (!wrapper.is(".full-screen")) {
 				wrapper.children(".placeholder")
 					.css({
 						height: textarea.offsetHeight + "px",
 						width: textarea.offsetWidth + "px"
 					});
+				wrapper.addClass("full-screen");
+				async(function () { ta.addClass("full-screen"); });
+			} else {
+				ta.removeClass("full-screen");
+				async(function () { wrapper.removeClass("full-screen"); });
 			}
-			wrapper.toggleClass("full-screen")
 			return false;
 		}
 	}, {
@@ -301,10 +313,7 @@
 					$(this).removeClass("focus");
 				} else if (!$(this).is(".focus") && e.target.nodeName === "TEXTAREA") {
 					getToolbar().insertAfter(e.target);
-					var self = this;
-					setTimeout(function () {
-						$(self).addClass("focus");
-					}, 10);
+					async(function () { $(this).addClass("focus"); }, this);
 				}
 			}, 100, function (e) {
 				return this.id;
