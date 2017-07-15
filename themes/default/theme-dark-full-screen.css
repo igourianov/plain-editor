@@ -1,0 +1,10 @@
+
+.plain-editor.theme-dark-full-screen textarea {
+	color: #333;
+}
+
+.plain-editor.theme-dark-full-screen.full-screen textarea {
+	color: #d4d4d4;
+	background-color: #1e1e1e;
+	opacity: .97;
+}
