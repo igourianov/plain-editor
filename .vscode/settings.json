@@ -5,7 +5,7 @@
     "minify.minifyExistingOnSave": true,
     "less.compile": {
         "compress": true,
-		"autoprefixer": "> 5%, last 2 Chrome versions, not ie 6-8",
+		"autoprefixer": "> 1%, last 2 Chrome versions, not ie 6-8",
 		"relativeUrls": true
     }
 }

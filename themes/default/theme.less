@@ -1,4 +1,4 @@
-// out: false
+// out: theme.min.css
 
 .plain-editor.theme-default textarea {
 	color: #333;
@@ -7,7 +7,6 @@
 }
 
 .plain-editor.theme-default.full-screen textarea {
-	transition: width .1s ease-in 0s, height .1s ease-in 0s;
 	padding: 1em;
 	opacity: 0.95;
 	font-size: 2vmax;
@@ -98,3 +97,6 @@
 .plain-editor.theme-default .toolbar > .ordered-list:before {
 	content: "\0049";
 }
+
+
+@import "./dark-full-screen.less";

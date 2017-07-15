@@ -4,6 +4,7 @@
 	<title>plain-editor demo</title>
 	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/normalize/7.0.0/normalize.min.css" />
 	<link rel="stylesheet" href="plain-editor.min.css" />
+	<link rel="stylesheet" href="themes/default/theme.min.css" />
 	<style>
 body {
 	margin: 50px 100px;
@@ -45,7 +46,7 @@ To display this text in HTML simply use 'white-space:pre-wrap' rule.</textarea>
 	<script>
 $(function () {
 	$("#editor").plainEditor()
-		.addClass("theme-default theme-dark-full-screen");
+		.addClass("theme-default xdark-full-screen");
 	$("form").on("submit", function () {
 		alert("Form submit!");
 		return false;
