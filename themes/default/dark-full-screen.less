@@ -1,7 +1,7 @@
 // out: false
 
 .plain-editor.theme-default.dark-full-screen textarea {
-	color: #333;
+	color: @text-color;
 }
 
 .plain-editor.theme-default.dark-full-screen.full-screen textarea {
@@ -9,4 +9,13 @@
 	background-color: #1e1e1e;
 	opacity: .97;
 	transition: width .1s ease-in 0s, height .1s ease-in 0s;
+}
+
+.plain-editor.theme-default.dark-full-screen.full-screen .toolbar {
+	color: @text-color;
+	background-color: rgba(250, 250, 250, .8);
+}
+
+.plain-editor.theme-default.dark-full-screen.full-screen .toolbar > *:hover:before {
+	text-shadow: 0 0 3px @text-color;
 }
