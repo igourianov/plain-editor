@@ -245,7 +245,7 @@
 
 	var getToolbar = function () {
 		if (!toolbar) {
-			toolbar = $("<div class='toolbar'/>").on("click", "> *", function (e) {
+			toolbar = $("<div class='toolbar' tabIndex=0 />").on("click", "> *", function (e) {
 				var textarea = this.parentNode.previousSibling;
 				behaviors.filter(function (b) {
 					return b.type === this.className;
@@ -256,7 +256,7 @@
 			behaviors.filter(function (b) {
 				return !!b.type;
 			}).forEach(function (b) {
-				$("<div tabIndex=0/>").addClass(b.type).appendTo(toolbar);
+				$("<div/>").addClass(b.type).appendTo(toolbar);
 			})
 		}
 		return toolbar;

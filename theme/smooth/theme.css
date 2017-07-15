@@ -31,6 +31,7 @@
 	transition-property: opacity, bottom;
 	transition-duration: 200ms;
 	transition-timing-function: ease-in, cubic-bezier(0.7, -0.55, 0.3, 1.55);
+	outline: none;
 }
 
 .plain-editor.theme-smooth.focus .toolbar {
@@ -43,23 +44,18 @@
 	margin: .3em;
 	margin-left: 0;
 	cursor: pointer;
-	/*border: .4em solid transparent;*/
 	width: 1em;
 	text-align: center;
 	font-size: 1.3em;
 	line-height: 1em;
-	outline: none;
-	/* disable text selection. Taken from: https://stackoverflow.com/questions/826782/how-to-disable-text-selection-highlighting-using-css#4407335 */
-	-webkit-touch-callout: none; /* iOS Safari */
-	-webkit-user-select: none; /* Safari */
-	-khtml-user-select: none; /* Konqueror HTML */
-	-moz-user-select: none; /* Firefox */
-	-ms-user-select: none; /* Internet Explorer/Edge */
-	user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
 }
 
 .plain-editor.theme-smooth .toolbar > *:first-child {
 	margin-left: .3em;
+}
+
+.plain-editor.theme-smooth .toolbar > *:hover:before {
+	text-shadow: 0 0 3px white;
 }
 
 
