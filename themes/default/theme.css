@@ -12,10 +12,6 @@
 	font-size: 2vmax;
 }
 
-.plain-editor.theme-default.full-screen .toolbar {
-	font-size: 2vmax;
-}
-
 .plain-editor.theme-default > .placeholder {
 	border: 3px dashed black;
 }
@@ -26,16 +22,17 @@
 
 .plain-editor.theme-default .toolbar {
 	display: block;
+	font-size: 1.4em;
+	line-height: 1em;
 	border-radius: 3px;
 	right: 20px;
 	opacity: 0;
-	bottom: -2em;
+	bottom: -1em;
 	background-color: rgba(0, 0, 0, .4);
 	color: white;
-	transition-property: opacity, bottom;
-	transition-duration: 200ms;
-	transition-timing-function: ease-in, cubic-bezier(0.7, -0.55, 0.3, 1.55);
 	outline: none;
+	padding: .2em;
+	transition: opacity .2s ease-in, bottom .2s cubic-bezier(0.7, -0.55, 0.3, 1.55);
 }
 
 .plain-editor.theme-default.focus .toolbar {
@@ -45,17 +42,14 @@
 
 .plain-editor.theme-default .toolbar > * {
 	float: left;
-	margin: .3em;
-	margin-left: 0;
+	margin-left: .3em;
 	cursor: pointer;
 	width: 1em;
 	text-align: center;
-	font-size: 1.3em;
-	line-height: 1em;
 }
 
 .plain-editor.theme-default .toolbar > *:first-child {
-	margin-left: .3em;
+	margin-left: 0;
 }
 
 .plain-editor.theme-default .toolbar > *:hover:before {
@@ -77,7 +71,7 @@
 .plain-editor.theme-default .toolbar > *:before{
 	font-family: 'toolbar icons';
 	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale
+	-moz-osx-font-smoothing: grayscale;
 }
 
 .plain-editor.theme-default .toolbar > .full-screen:before {
