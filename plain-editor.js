@@ -28,10 +28,10 @@
 		return index;
 	};
 
-	var getSelectionContext = function (editor) {
-		var start = editor.selectionStart,
-			end = editor.selectionEnd,
-			value = editor.value;
+	var getSelectionContext = function (textarea) {
+		var start = textarea.selectionStart,
+			end = textarea.selectionEnd,
+			value = textarea.value;
 		return {
 			start: start = findAny(value, [CR, LF], start - 1, -1) + 1,
 			end: end = findAny(value, [CR, LF], end, 1),
@@ -39,17 +39,17 @@
 		};
 	};
 
-	var insertText = function (editor, text) {
-		if (document.activeElement !== editor) {
-			editor.focus(); // required for insertText command to work
+	var insertText = function (textarea, text) {
+		if (document.activeElement !== textarea) {
+			textarea.focus(); // required for insertText command to work
 		}
 		document.execCommand("insertText", false, text);
 	};
 
-	var transformContext = function (editor, regex, replacer) {
-		var selectionStart = editor.selectionStart,
-			selectionEnd = editor.selectionEnd;
-		var context = getSelectionContext(editor);
+	var transformContext = function (textarea, regex, replacer) {
+		var selectionStart = textarea.selectionStart,
+			selectionEnd = textarea.selectionEnd;
+		var context = getSelectionContext(textarea);
 		var value = context.value.replace(regex, function (match) {
 			var index = arguments[arguments.length - 2] + context.start;
 			var ret = replacer.apply ? replacer.apply(this, arguments) : replacer;
@@ -62,11 +62,11 @@
 			}
 			return ret;
 		});
-		editor.selectionStart = context.start;
-		editor.selectionEnd = context.end;
-		insertText(editor, value);
-		editor.selectionStart = selectionStart;
-		editor.selectionEnd = selectionEnd;
+		textarea.selectionStart = context.start;
+		textarea.selectionEnd = context.end;
+		insertText(textarea, value);
+		textarea.selectionStart = selectionStart;
+		textarea.selectionEnd = selectionEnd;
 	};
 
 	var getWrapper = function (textarea) {
@@ -83,7 +83,6 @@
 			var scope = this,
 				args = arguments,
 				key = selector && selector.apply(scope, args) || "";
-			console.log(key);
 			if (handle[key]) {
 				clearTimeout(handle[key]);
 			}
@@ -99,30 +98,30 @@
 		key: KEY_ENTER,
 		mod: MOD_ALT,
 		type: "full-screen",
-		action: function (editor) {
-			$(getWrapper(editor)).toggleClass("full-screen");
+		action: function (textarea) {
+			$(getWrapper(textarea)).toggleClass("full-screen");
 			return false;
 		}
 	}, {
 		// close full screen or exit focus (to compensate for Tab overridden action)
 		key: KEY_ESC,
-		action: function (editor) {
-			if ($(getWrapper(editor)).is(".full-screen")) {
-				$(getWrapper(editor)).removeClass("full-screen");
+		action: function (textarea) {
+			if ($(getWrapper(textarea)).is(".full-screen")) {
+				$(getWrapper(textarea)).removeClass("full-screen");
 			} else {
-				editor.blur();
+				textarea.blur();
 			}
 		}
 	}, {
 		// indent text
 		key: KEY_TAB,
 		type: "indent",
-		action: function (editor) {
-			var selection = editor.value.substring(editor.selectionStart, editor.selectionEnd);
+		action: function (textarea) {
+			var selection = textarea.value.substring(textarea.selectionStart, textarea.selectionEnd);
 			if (!selection.match(/(?:\r\n|\r|\n)/)) {
-				insertText(editor, TAB);
+				insertText(textarea, TAB);
 			} else {
-				transformContext(editor, /^/mg, TAB);
+				transformContext(textarea, /^/mg, TAB);
 			}
 			return false;
 		}
@@ -131,8 +130,8 @@
 		key: KEY_TAB,
 		mod: MOD_SHIFT,
 		type: "unindent",
-		action: function (editor) {
-			transformContext(editor, /^(?:\t| {1,4})/mg, "");
+		action: function (textarea) {
+			transformContext(textarea, /^(?:\t| {1,4})/mg, "");
 			return false;
 		}
 	}, {
@@ -140,8 +139,8 @@
 		key: "*",
 		mod: MOD_CTRL | MOD_SHIFT,
 		type: "bullets",
-		action: function (editor) {
-			transformContext(editor, indentRegex, function (match, indent, bullet, digit, separator, index) {
+		action: function (textarea) {
+			transformContext(textarea, indentRegex, function (match, indent, bullet, digit, separator, index) {
 				bullet = bullets[bullets.indexOf(bullet) + 1];
 				return indent + (bullet ? bullet + NBSP : "");
 			});
@@ -152,10 +151,10 @@
 		key: "&",
 		mod: MOD_CTRL | MOD_SHIFT,
 		type: "ordered-list",
-		action: function (editor) {
+		action: function (textarea) {
 			var counter = 0,
 				toggle;
-			transformContext(editor, indentRegex, function (match, indent, bullet, digit, separator, index) {
+			transformContext(textarea, indentRegex, function (match, indent, bullet, digit, separator, index) {
 				if (toggle === undefined) {
 					toggle = !digit;
 				}
@@ -169,9 +168,9 @@
 	}, {
 		// maintain indentation on new lines
 		key: KEY_ENTER,
-		action: function (editor) {
+		action: function (textarea) {
 			indentRegex.lastIndex = 0;
-			var context = getSelectionContext(editor),
+			var context = getSelectionContext(textarea),
 				match = indentRegex.exec(context.value),
 				indent;
 			if (match[3] !== undefined) {
@@ -182,15 +181,15 @@
 				indent = match[1];
 			}
 			if (indent) {
-				insertText(editor, LF + indent);
+				insertText(textarea, LF + indent);
 				return false;
 			}
 		}
 	}, {
 		key: KEY_ENTER,
 		mod: MOD_CTRL,
-		action: function (editor) {
-			$(editor).closest("form").submit();
+		action: function (textarea) {
+			$(textarea).closest("form").submit();
 		}
 	}];
 
@@ -228,7 +227,7 @@
 		return !blockEmpty;
 	};
 
-	var pasteHtml = function (editor, html) {
+	var pasteHtml = function (textarea, html) {
 		var buffer = [],
 			node = document.createElement("div");
 		node.innerHTML = html;
@@ -240,7 +239,7 @@
 			}
 		}
 		htmlToText(node, buffer, { level: 0, counter: 0 }, true);
-		insertText(editor, buffer.join(""));
+		insertText(textarea, buffer.join(""));
 	};
 
 	var getToolbar = function () {
@@ -265,13 +264,13 @@
 	$.fn.plainEditor = function () {
 		return this
 			.on("keydown", function (e) {
-				var editor = e.target,
+				var textarea = e.target,
 					key = e.key,
 					mod = (+e.shiftKey * MOD_SHIFT) | (+e.altKey * MOD_ALT) | (+e.ctrlKey * MOD_CTRL) | (+e.metaKey * MOD_META);
 				for (var i = 0; i < behaviors.length; i++) {
 					var behavior = behaviors[i];
 					if (behavior.key === key && (behavior.mod || 0) === mod) {
-						return behavior.action(editor);
+						return behavior.action(textarea);
 					}
 				}
 			})
