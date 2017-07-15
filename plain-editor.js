@@ -104,7 +104,7 @@
 				wrapper.children(".placeholder")
 					.css({
 						height: textarea.offsetHeight + "px",
-						width: textarea.offsetWidth + "px",
+						width: textarea.offsetWidth + "px"
 					});
 			}
 			wrapper.toggleClass("full-screen")
@@ -300,7 +300,7 @@
 					.insertAfter(this)
 					.children(".floater").append(this);
 			})
-			.attr({ id: null, class: null })
+			.attr({ id: null, "class": null })
 			.closest(".plain-editor")
 			.on("focusin focusout", debounce(function (e) {
 				if (e.type == "focusout") {
