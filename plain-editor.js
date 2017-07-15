@@ -11,6 +11,7 @@
 		KEY_ESC = "Escape",
 		NBSP = "\u00A0",
 		toolbar,
+		wrapperClass = "plain-editor",
 		uid = 0,
 		bullets = ["\u2022", "\u25E6", "\u25A0", "\u25B8"],
 		blockElements = ["DIV", "P", "LI", "UL", "OL", "BLOCKQUOTE", "ARTICLE", "SECTION", "H1", "H2", "H3", "H4", "H6", "H6", "BR"],
@@ -69,14 +70,6 @@
 		textarea.selectionEnd = selectionEnd;
 	};
 
-	var getWrapper = function (textarea) {
-		return textarea.parentNode.parentNode;
-	};
-
-	var getTextarea = function (wrapper) {
-		return wrapper.firstChild.firstChild;
-	};
-
 	var debounce = function (func, timeout, selector) {
 		var handle = {};
 		return function () {
@@ -99,7 +92,7 @@
 		mod: MOD_ALT,
 		type: "full-screen",
 		action: function (textarea) {
-			var wrapper = $(getWrapper(textarea));
+			var wrapper = $(textarea).closest("." + wrapperClass);
 			if (wrapper.not(".full-screen")) {
 				wrapper.children(".placeholder")
 					.css({
@@ -114,8 +107,9 @@
 		// close full screen or exit focus (to compensate for Tab overridden action)
 		key: KEY_ESC,
 		action: function (textarea) {
-			if ($(getWrapper(textarea)).is(".full-screen")) {
-				$(getWrapper(textarea)).removeClass("full-screen");
+			var wrapper = $(textarea).closest("." + wrapperClass);
+			if (wrapper.is(".full-screen")) {
+				wrapper.removeClass("full-screen");
 			} else {
 				textarea.blur();
 			}
@@ -294,19 +288,19 @@
 				}
 			})
 			.each(function () {
-				$("<div class='plain-editor'><div class='floater'/><div class='placeholder'/></div>")
-					.attr("id", this.id || ("plain-editor" + (++uid)))
+				$("<div class='" + wrapperClass + "'><div class='floater'/><div class='placeholder'/></div>")
+					.attr("id", this.id || (wrapperClass + (++uid)))
 					.addClass(this.className)
 					.insertAfter(this)
 					.children(".floater").append(this);
 			})
 			.attr({ id: null, "class": null })
-			.closest(".plain-editor")
+			.closest("." + wrapperClass)
 			.on("focusin focusout", debounce(function (e) {
 				if (e.type == "focusout") {
 					$(this).removeClass("focus");
-				} else if (e.target === getTextarea(this)) {
-					getToolbar().insertAfter(getTextarea(this));
+				} else if (!$(this).is(".focus") && e.target.nodeName === "TEXTAREA") {
+					getToolbar().insertAfter(e.target);
 					var self = this;
 					setTimeout(function () {
 						$(self).addClass("focus");
