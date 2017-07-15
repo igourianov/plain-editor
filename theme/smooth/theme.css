@@ -4,16 +4,15 @@
 	border: 1px solid #333;
 	padding: 0.5em;
 	font-size: 1em;
-	transition: font-size 100ms ease-out;
-}
-
-.plain-editor.theme-smooth.full-screen {
-	font-size: 2vmax;
 }
 
 .plain-editor.theme-smooth.full-screen textarea {
 	padding: 1em;
 	opacity: 0.95;
+	font-size: 2vmax;
+}
+
+.plain-editor.theme-smooth.full-screen .toolbar {
 	font-size: 2vmax;
 }
 
@@ -27,7 +26,6 @@
 	right: 20px;
 	opacity: 0;
 	bottom: -2em;
-	line-height: 1em;
 	background-color: rgba(0, 0, 0, .4);
 	color: white;
 	transition-property: opacity, bottom;
@@ -42,10 +40,15 @@
 
 .plain-editor.theme-smooth .toolbar > * {
 	float: left;
+	margin: .3em;
+	margin-left: 0;
 	cursor: pointer;
-	border: .5em solid transparent;
+	/*border: .4em solid transparent;*/
 	width: 1em;
 	text-align: center;
+	font-size: 1.3em;
+	line-height: 1em;
+	outline: none;
 	/* disable text selection. Taken from: https://stackoverflow.com/questions/826782/how-to-disable-text-selection-highlighting-using-css#4407335 */
 	-webkit-touch-callout: none; /* iOS Safari */
 	-webkit-user-select: none; /* Safari */
@@ -55,16 +58,47 @@
 	user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
 }
 
+.plain-editor.theme-smooth .toolbar > *:first-child {
+	margin-left: .3em;
+}
 
+
+@font-face {
+    font-family: 'toolbar icons';
+    src: url('./fonts/toolbar-icons.eot');
+    src: url('./fonts/toolbar-icons.eot?#iefix') format('embedded-opentype'),
+         url('./fonts/toolbar-icons.woff') format('woff'),
+         url('./fonts/toolbar-icons.ttf') format('truetype'),
+         url('./fonts/toolbar-icons.svg#toolbar-icons') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+.plain-editor.theme-smooth .toolbar > *:before{
+	font-family: 'toolbar icons';
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale
+}
 
 .plain-editor.theme-smooth .toolbar > .full-screen:before {
-	content: "f";
+	content: "\004f";
+}
+
+.plain-editor.theme-smooth.full-screen .toolbar > .full-screen:before {
+	content: "\0050";
 }
 
 .plain-editor.theme-smooth .toolbar > .indent:before {
-	content: "i";
+	content: "\0041";
 }
 
 .plain-editor.theme-smooth .toolbar > .unindent:before {
-	content: "u";
+	content: "\0042";
+}
+
+.plain-editor.theme-smooth .toolbar > .bullets:before {
+	content: "\0048";
+}
+
+.plain-editor.theme-smooth .toolbar > .ordered-list:before {
+	content: "\0049";
 }
