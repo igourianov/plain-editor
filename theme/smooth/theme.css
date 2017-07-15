@@ -16,6 +16,10 @@
 	font-size: 2vmax;
 }
 
+.plain-editor.theme-smooth > .placeholder {
+	border: 3px dashed black;
+}
+
 
 
 
@@ -69,6 +73,7 @@
     font-weight: normal;
     font-style: normal;
 }
+
 .plain-editor.theme-smooth .toolbar > *:before{
 	font-family: 'toolbar icons';
 	-webkit-font-smoothing: antialiased;

@@ -31,3 +31,12 @@
 	-ms-user-select: none; /* Internet Explorer/Edge */
 	user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
 }
+
+.plain-editor > .placeholder {
+	display: none;
+	box-sizing: border-box;
+}
+
+.plain-editor.full-screen > .placeholder {
+	display: inline-block;
+}

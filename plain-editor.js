@@ -99,7 +99,15 @@
 		mod: MOD_ALT,
 		type: "full-screen",
 		action: function (textarea) {
-			$(getWrapper(textarea)).toggleClass("full-screen");
+			var wrapper = $(getWrapper(textarea));
+			if (wrapper.not(".full-screen")) {
+				wrapper.children(".placeholder")
+					.css({
+						height: textarea.offsetHeight + "px",
+						width: textarea.offsetWidth + "px",
+					});
+			}
+			wrapper.toggleClass("full-screen")
 			return false;
 		}
 	}, {
@@ -285,8 +293,26 @@
 					}
 				}
 			})
-			.wrap("<div class='floater'/>").parent()
-			.wrap("<div class='plain-editor'/>").parent().attr("id", function () { return "plain-editor-" + (++uid); })
+			.each(function () {
+				var next = this.nextSibling,
+					parent = this.parentNode,
+					container = document.createElement("div"),
+					floater = document.createElement("div"),
+					placeholder = document.createElement("div");
+				container.className = (this.className || "") + " plain-editor";
+				this.className = "";
+				container.id = ++uid;
+				container.appendChild(floater);
+				floater.className = "floater";
+				floater.appendChild(this);
+				placeholder.className = "placeholder";
+				container.appendChild(placeholder);
+				if (next) {
+					parent.insertBefore(container, next);
+				} else {
+					parent.appendChild(container);
+				}
+			}).closest(".plain-editor")
 			.on("focusin focusout", debounce(function (e) {
 				if (e.type == "focusout") {
 					$(this).removeClass("focus");
