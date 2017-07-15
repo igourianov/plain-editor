@@ -1,22 +1,22 @@
 
-.plain-editor.theme-smooth textarea {
+.plain-editor.theme-default textarea {
 	color: #333;
 	border: 1px solid #333;
 	padding: 0.5em;
 	font-size: 1em;
 }
 
-.plain-editor.theme-smooth.full-screen textarea {
+.plain-editor.theme-default.full-screen textarea {
 	padding: 1em;
 	opacity: 0.95;
 	font-size: 2vmax;
 }
 
-.plain-editor.theme-smooth.full-screen .toolbar {
+.plain-editor.theme-default.full-screen .toolbar {
 	font-size: 2vmax;
 }
 
-.plain-editor.theme-smooth > .placeholder {
+.plain-editor.theme-default > .placeholder {
 	border: 3px dashed black;
 }
 
@@ -24,7 +24,7 @@
 
 
 
-.plain-editor.theme-smooth .toolbar {
+.plain-editor.theme-default .toolbar {
 	display: block;
 	border-radius: 3px;
 	right: 20px;
@@ -38,12 +38,12 @@
 	outline: none;
 }
 
-.plain-editor.theme-smooth.focus .toolbar {
+.plain-editor.theme-default.focus .toolbar {
 	opacity: 1;
-	bottom: 2px;
+	bottom: 3px;
 }
 
-.plain-editor.theme-smooth .toolbar > * {
+.plain-editor.theme-default .toolbar > * {
 	float: left;
 	margin: .3em;
 	margin-left: 0;
@@ -54,11 +54,11 @@
 	line-height: 1em;
 }
 
-.plain-editor.theme-smooth .toolbar > *:first-child {
+.plain-editor.theme-default .toolbar > *:first-child {
 	margin-left: .3em;
 }
 
-.plain-editor.theme-smooth .toolbar > *:hover:before {
+.plain-editor.theme-default .toolbar > *:hover:before {
 	text-shadow: 0 0 3px white;
 }
 
@@ -74,32 +74,32 @@
     font-style: normal;
 }
 
-.plain-editor.theme-smooth .toolbar > *:before{
+.plain-editor.theme-default .toolbar > *:before{
 	font-family: 'toolbar icons';
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale
 }
 
-.plain-editor.theme-smooth .toolbar > .full-screen:before {
+.plain-editor.theme-default .toolbar > .full-screen:before {
 	content: "\004f";
 }
 
-.plain-editor.theme-smooth.full-screen .toolbar > .full-screen:before {
+.plain-editor.theme-default.full-screen .toolbar > .full-screen:before {
 	content: "\0050";
 }
 
-.plain-editor.theme-smooth .toolbar > .indent:before {
+.plain-editor.theme-default .toolbar > .indent:before {
 	content: "\0041";
 }
 
-.plain-editor.theme-smooth .toolbar > .unindent:before {
+.plain-editor.theme-default .toolbar > .unindent:before {
 	content: "\0042";
 }
 
-.plain-editor.theme-smooth .toolbar > .bullets:before {
+.plain-editor.theme-default .toolbar > .bullets:before {
 	content: "\0048";
 }
 
-.plain-editor.theme-smooth .toolbar > .ordered-list:before {
+.plain-editor.theme-default .toolbar > .ordered-list:before {
 	content: "\0049";
 }
